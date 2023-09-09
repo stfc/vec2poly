@@ -1,0 +1,3 @@
+* Worry about numerical stability in intersects()
+* Auto-derive sensible tolerance value from input parameters
+* Doesn't handle line segments that intersect in more than one point (parallel and overlapping)
