@@ -10,6 +10,7 @@
 bool expect(int i, lineseg const &, lineseg const &, std::optional<point>);
 
 static bool test_lineseg();
+static bool test_poly1();
 
 int tests()
 {

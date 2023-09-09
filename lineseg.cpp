@@ -6,10 +6,9 @@
 #include "lineseg.h"
 
 
-lineseg lineseg::split(double t)
+lineseg lineseg::split_at(point p)
 {
-    assert(point::tol < t && t < 1.0-point::tol);
-    point p(a_.x_+dx_*t, a_.y_+dy_*t), q{b_};
+    point q{b_};
     b_ = p;
     return lineseg(p, q);
 }
