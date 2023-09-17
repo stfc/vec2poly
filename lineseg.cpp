@@ -3,11 +3,15 @@
 //
 
 #include <cassert>
+#include <ranges>
+#include <iostream>
 #include "lineseg.h"
 
 
 lineseg lineseg::split_at(point p)
 {
+    if(is_endpoint(p))
+        throw BadLineSegment();
     point q{b_};
     b_ = p;
     return lineseg(p, q);
@@ -32,4 +36,24 @@ std::optional<point> intersects(lineseg const &v, lineseg const &w)
         return point(z.x()-t*w.dx_,z.y()-t*w.dy_);
     }
     return std::nullopt;
+}
+
+
+std::ostream &operator<<(std::ostream &os, lineseg const &line)
+{
+    os << '[' << line.a_ << ',' << line.b_ << ']';
+    return os;
+}
+
+
+path::path(std::initializer_list<point> q)
+{
+    if(q.size() < 1)
+        throw BadPath();
+    // adjacent/pairwise not available until C++23... and zip
+    point prev{*q.begin()};
+    for( auto const &y : std::ranges::views::drop(q, 1)) {
+        path_.push_back(lineseg(prev, y));
+        prev = y;
+    }
 }

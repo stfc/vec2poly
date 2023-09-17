@@ -20,5 +20,7 @@ add_executable(vec2poly main.cpp
         lineseg.cpp
         lineseg.h
         tests.cpp
+        world.cpp
+        world.h
 )
 

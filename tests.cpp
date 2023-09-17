@@ -6,6 +6,7 @@
 // #include <gtest/gtest.h>
 #include <iostream>
 #include "lineseg.h"
+#include "world.h"
 
 bool expect(int i, lineseg const &, lineseg const &, std::optional<point>);
 
@@ -15,6 +16,7 @@ static bool test_poly1();
 int tests()
 {
     bool ret = test_lineseg();
+    ret |= test_poly1();
     return ret ? 0 : 1;
 }
 
@@ -55,4 +57,13 @@ expect(int i, lineseg const &v, lineseg const &w, std::optional<point> expt)
         ret = false;
     }
     return ret;
+}
+
+
+bool test_poly1()
+{
+    world w;
+    w.add_path(path{{1,2},{2,3},{3,1}});
+    w.split_paths();
+    return true;
 }
