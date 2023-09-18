@@ -63,7 +63,13 @@ expect(int i, lineseg const &v, lineseg const &w, std::optional<point> expt)
 bool test_poly1()
 {
     world w;
+    std::cout << "No paths\n";
+    w.split_paths();
     w.add_path(path{{1,2},{2,3},{3,1}});
+    std::cout << "One path\n";
+    w.split_paths();
+    std::cout << "Two paths\n";
+    w.add_path(path{{-1,-2},{-2,-3},{-3,-1}});
     w.split_paths();
     return true;
 }

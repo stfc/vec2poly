@@ -16,7 +16,7 @@ private:
 
     /* This iterator works like ranges::views::join but we need both */
     struct iterator {
-        // current and sentinel
+        // current position and sentinel
         std::vector<path>::iterator cc_, cs_;
         decltype(path::path_)::iterator dc_, ds_;
 
@@ -28,7 +28,13 @@ private:
             }
         }
         iterator &operator++() noexcept;
-        bool operator==(const iterator &other) { return cc_ == other.cc_ && ds_ == other.ds_; }
+	iterator operator++(int) noexcept { auto i{*this}; ++(*this); return i; }
+        bool operator==(const iterator &other)
+	{
+	    /* dc_ iterator is valid only if cc_ is not equal to cs_ */
+	    return cc_ == other.cc_
+		&& (cc_ == cs_ || other.cc_ == other.cs_ || dc_ == other.dc_);
+	}
         auto &operator*() { return *dc_; }
     };
     iterator begin() { return iterator(map_); }
