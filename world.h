@@ -14,7 +14,9 @@ class world {
 private:
     std::vector<path> map_;
 
-    /* This iterator works like ranges::views::join but we need both */
+    /* This iterator works like ranges::views::join, but we need both iterators
+     * so we can insert stuff at the list iterator position.
+     * Otherwise, this approach is not recommended; much too fiddly */
     struct iterator {
         // current position and sentinel
         std::vector<path>::iterator cc_, cs_;
@@ -36,6 +38,9 @@ private:
 		&& (cc_ == cs_ || other.cc_ == other.cs_ || dc_ == other.dc_);
 	}
         auto &operator*() { return *dc_; }
+
+        /** Insert a line segment _after_ the current one */
+        void insert(lineseg &&);
     };
     iterator begin() { return iterator(map_); }
     iterator end() { return iterator(map_, false); }
@@ -43,6 +48,9 @@ private:
 public:
     void add_path(path &&p) { map_.push_back(std::move(p)); }
     void split_paths();
+
+    // testing
+    friend bool test_poly1();
 };
 
 

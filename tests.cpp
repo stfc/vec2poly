@@ -11,7 +11,7 @@
 bool expect(int i, lineseg const &, lineseg const &, std::optional<point>);
 
 static bool test_lineseg();
-static bool test_poly1();
+bool test_poly1();
 
 int tests()
 {
@@ -66,9 +66,12 @@ bool test_poly1()
     std::cout << "No paths\n";
     w.split_paths();
     w.add_path(path{{1,2},{2,3},{3,1}});
+    auto q = w.begin(); // point to first segment
+    ++q;  // point to second and last segment
+    q.insert(lineseg(point(8,5),point(7,6)));
     std::cout << "One path\n";
     w.split_paths();
-    std::cout << "Two paths\n";
+    std::cout << "Two paths (concatenated)\n";
     w.add_path(path{{-1,-2},{-2,-3},{-3,-1}});
     w.split_paths();
     return true;
