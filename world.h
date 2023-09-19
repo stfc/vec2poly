@@ -49,11 +49,13 @@ private:
 	    return dc_ == other.dc_;
 	}
         auto &operator*() { return *dc_; }
+        auto *operator->() { return &(*dc_); }
 
         /** Insert a line segment _after_ the current one.
-	 * Insertion does not validate the iterator, though add_path may.
-	 * It is not possible to insert at beginning (with this call).
-	 * */
+         *
+         * Insertion does not validate the iterator, though add_path may.
+         * It is not possible to insert at beginning (with this call).
+         * */
         void insert_after(lineseg &&);
     };
     iterator begin() { return iterator(map_); }
@@ -63,8 +65,9 @@ public:
     void add_path(path &&p) { map_.push_back(std::move(p)); }
     void split_paths();
 
-    // testing
+    // regression testing
     friend bool test_poly1();
+    friend bool test_poly2();
 };
 
 

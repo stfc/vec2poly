@@ -30,19 +30,38 @@ void world::iterator::insert_after(lineseg &&elt)
      * (which may be at the end) without incrementing dc_
      */
     if(dc_->last() != elt.first())
-	throw BadPath("Start of inserted segment does not match previous");
+        throw BadPath("Start of inserted segment does not match previous");
     ++at;
     if(at != ds_ && elt.last() != at->first())
-	throw BadPath("End of inserted segment does not match next");
+        throw BadPath("End of inserted segment does not match next");
     cc_->path_.insert(at, std::forward<lineseg>(elt));
 }
 
 
 void world::split_paths()
 {
-    // Dummy test code
-    for( auto const &u : *this ) {
-        std::cout << u << ' ';
+    iterator p = begin();
+    iterator const z = end();
+    /* A pairwise comparison of every line segment with every other one.
+     * The invariant is that every segment up to p intersects any other segments
+     * only at its endpoints, if at all.
+     */
+    while(p != z ) {
+        iterator q = p; ++q;
+        while(q != z ) {
+            auto u{intersects(*p,*q)};
+            if(u.has_value()) {
+                auto v{u.value()};
+                if(!p->is_endpoint(v)) {
+                    // split_at shortens the current line segment and returns the one to insert
+                    p.insert_after(p->split_at(v));
+                }
+                if(!q->is_endpoint(v)) {
+                    q.insert_after(q->split_at(v));
+                }
+            }
+            ++q;
+        }
+        ++p;
     }
-    std::cout << std::endl;
 }

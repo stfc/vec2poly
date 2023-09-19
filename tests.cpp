@@ -5,6 +5,8 @@
 // TODO migrate to gtest?
 // #include <gtest/gtest.h>
 #include <iostream>
+#include <array>
+#include <functional>
 #include "lineseg.h"
 #include "world.h"
 
@@ -12,27 +14,28 @@ bool expect(int i, lineseg const &, lineseg const &, std::optional<point>);
 
 [[nodiscard]] static bool test_lineseg();
 [[nodiscard]] bool test_poly1();
+[[nodiscard]] bool test_poly2();
 
 int tests()
 {
     bool ret = true;
-    try {
-	ret |= test_lineseg();
-    }
-    catch(BadLineSegment &bad) {
-	std::cerr << "lineseg Bad Line Segment exception " << bad.what() << std::endl;
-	return 1;
-    }
-    try {
-	ret |= test_poly1();
-    }
-    catch(BadLineSegment &bad) {
-	std::cerr << "poly1 Bad Line Segment exception " << bad.what() << std::endl;
-	return 1;
-    }
-    catch(BadPath &bad) {
-	std::cerr << "poly1 BadPath exception " << bad.what() << std::endl;
-	return 1;
+    unsigned num{0};
+    std::array<std::function<bool()>,3> all{test_lineseg, test_poly1, test_poly2};
+    for( auto testfunc : all ) {
+        ++num;
+        try {
+            bool result = testfunc();
+            if(!result)
+                std::cerr << "Test " << num << " failed with no exception raised\n";
+        }
+        catch (BadLineSegment &bad) {
+            std::cerr << "Test " << num << ": Bad Line Segment exception " << bad.what() << std::endl;
+            return 1;
+        }
+        catch (BadPath &bad) {
+            std::cerr << "Test " << num << ": BadPath exception " << bad.what() << std::endl;
+            return 1;
+        }
     }
     return ret ? 0 : 1;
 }
@@ -82,8 +85,8 @@ bool test_poly1()
     world w;
     // World is empty, so should not iterate here
     for( auto const &y : w ) {
-	std::cerr << "Error: World is not empty!\n";
-	return false;
+        std::cerr << "Error: World is not empty!\n";
+        return false;
     }
     point a(1,2), b(2,3), c(3,1), d(4,5), e(-1,-2), f(-2,-3), o(0,0);
     // Two line segments: a->b and b->c
@@ -93,8 +96,8 @@ bool test_poly1()
     // Add c->d
     q.insert_after(lineseg({c,d}));
     if( w.map_[0] != path({a,b,c,d}) ) {
-	std::cerr << "Insertion failed: " << w.map_[0] << '\n';
-	return false;
+        std::cerr << "Insertion failed: " << w.map_[0] << '\n';
+        return false;
     }
     // Add e->f as a separate path
     w.add_path(path({e,f}));
@@ -103,15 +106,26 @@ bool test_poly1()
     // q should now reference the single line segment on the second path
     q.insert_after(lineseg({f,o}));
     if(w.map_.size() != 2) {
-	std::cerr << "Expected two paths; found " << w.map_.size() << '\n';
-	return false;
+        std::cerr << "Expected two paths; found " << w.map_.size() << '\n';
+        return false;
     }
     if(w.map_[0] != path({a,b,c,d}) || w.map_[1] != path({e,f,o})) {
-	std::cerr << "Error with paths " << w.map_[0] << " or " << w.map_[1] << '\n';
-	return false;
+        std::cerr << "Error with paths " << w.map_[0] << " or " << w.map_[1] << '\n';
+        return false;
     }
     // Finally, an insert at not-the-end - q still points to the *first* entry on path 2
     // This is a dummy line segment, not usually useful (or permitted)
     q.insert_after(lineseg({f,f}));
     return true;
+}
+
+
+bool test_poly2()
+{
+    world w;
+    w.add_path(path{{-2,2},{-1,2},{-1,-2},{2,-2},{2,1},{3,2}});
+    w.add_path(path{{-3,1},{3,1}});
+    w.split_paths();
+    return w.map_[0] == path({{-2,2},{-1,2},{-1,1},{-1,-2},{2,-2},{2,1},{3,2}})
+           && w.map_[1] == path{{-3,1},{-1,1},{2,1},{3,1}};
 }
