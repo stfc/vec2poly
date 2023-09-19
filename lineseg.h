@@ -5,14 +5,25 @@
 #ifndef VEC2POLY_LINESEG_H
 #define VEC2POLY_LINESEG_H
 
+#include <exception>
 #include <optional>
 #include <list>
 #include <iosfwd>
 #include "point.h"
 
-class BadLineSegment {
+class BadLineSegment : public std::exception {
+    char const *const msg_;
+public:
+    BadLineSegment() : msg_("Bad Line Segment") {};
+    BadLineSegment(char const *msg) : msg_(msg) {}
+    char const *what() const noexcept override { return msg_; }
 };
-class BadPath {
+class BadPath : public std::exception {
+    char const *const msg_;
+public:
+    BadPath() : msg_("Bad Path") {};
+    BadPath(char const *msg) : msg_(msg) {}
+    char const *what() const noexcept override { return msg_; }
 };
 
 class lineseg {
@@ -29,6 +40,13 @@ public:
             throw BadLineSegment();
 #endif
     }
+
+    bool operator==(lineseg const &other) const noexcept
+    {
+	return a_ == other.a_ && b_ == other.b_;
+    }
+    point first() const noexcept { return a_; }
+    point last() const noexcept { return b_; }
     /** Split a line segment into two parts at a given point along its length
      * The line segment is shortened and the remaining segment is returned.
      *
@@ -63,8 +81,11 @@ public:
     path(path &&) = default;
     path &operator=(path const &) = delete;
     path &operator=(path &&) = default;
+
+    bool operator==(path const &) const noexcept = default;
     /* This breaks encapsulation but can be Fixed Later(tm) */
     friend class world;
+    friend std::ostream &operator<<(std::ostream &, path const &);
 };
 
 

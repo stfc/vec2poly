@@ -15,8 +15,10 @@ private:
     std::vector<path> map_;
 
     /* This iterator works like ranges::views::join, but we need both iterators
-     * so we can insert stuff at the list iterator position.
-     * Otherwise, this approach is not recommended; much too fiddly */
+     * so we can insert stuff at the list iterator position (which does not
+     * invalidate the iterator).
+     * Otherwise, this approach is not recommended; much too fiddly.
+     * Correctness is helped also by the fact that paths are never empty. */
     struct iterator {
         // current position and sentinel
         std::vector<path>::iterator cc_, cs_;
@@ -33,14 +35,26 @@ private:
 	iterator operator++(int) noexcept { auto i{*this}; ++(*this); return i; }
         bool operator==(const iterator &other)
 	{
+	    /* Could check the sentinels (cs_ and other.cs_):
+	     * If the sentinels differ, then we are iterators for different sequences,
+	     * or one iterator has been invalidated. */
+	    if(cc_ != other.cc_)
+		return false;
 	    /* dc_ iterator is valid only if cc_ is not equal to cs_ */
-	    return cc_ == other.cc_
-		&& (cc_ == cs_ || other.cc_ == other.cs_ || dc_ == other.dc_);
+	    if(cc_ == cs_)
+		return other.cc_ == other.cs_;
+	    else
+		if(other.cc_ == other.cs_)
+		    return false;
+	    return dc_ == other.dc_;
 	}
         auto &operator*() { return *dc_; }
 
-        /** Insert a line segment _after_ the current one */
-        void insert(lineseg &&);
+        /** Insert a line segment _after_ the current one.
+	 * Insertion does not validate the iterator, though add_path may.
+	 * It is not possible to insert at beginning (with this call).
+	 * */
+        void insert_after(lineseg &&);
     };
     iterator begin() { return iterator(map_); }
     iterator end() { return iterator(map_, false); }

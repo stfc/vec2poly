@@ -23,13 +23,17 @@ world::iterator &world::iterator::operator++() noexcept
 }
 
 
-void world::iterator::insert(lineseg &&elt)
+void world::iterator::insert_after(lineseg &&elt)
 {
     auto at{dc_};
     /* When we're called dc_ is never at the end and we need to insert at the next position
      * (which may be at the end) without incrementing dc_
      */
+    if(dc_->last() != elt.first())
+	throw BadPath("Start of inserted segment does not match previous");
     ++at;
+    if(at != ds_ && elt.last() != at->first())
+	throw BadPath("End of inserted segment does not match next");
     cc_->path_.insert(at, std::forward<lineseg>(elt));
 }
 

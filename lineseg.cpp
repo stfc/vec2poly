@@ -57,3 +57,11 @@ path::path(std::initializer_list<point> q)
         prev = y;
     }
 }
+
+
+std::ostream &operator<<(std::ostream &os, path const &p)
+{
+    for(auto const &p : p.path_)
+	os << p;
+    return os;
+}
