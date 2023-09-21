@@ -15,12 +15,13 @@ bool expect(int i, lineseg const &, lineseg const &, std::optional<point>);
 [[nodiscard]] static bool test_lineseg();
 [[nodiscard]] bool test_poly1();
 [[nodiscard]] bool test_poly2();
+[[nodiscard]] bool test_path_iter();
 
 int tests()
 {
     bool ret = true;
     unsigned num{0};
-    std::array<std::function<bool()>,3> all{test_lineseg, test_poly1, test_poly2};
+    std::array<std::function<bool()>,4> all{test_lineseg, test_poly1, test_poly2, test_path_iter};
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -128,4 +129,20 @@ bool test_poly2()
     w.split_paths();
     return w.map_[0] == path({{-2,2},{-1,2},{-1,1},{-1,-2},{2,-2},{2,1},{3,2}})
            && w.map_[1] == path{{-3,1},{-1,1},{2,1},{3,1}};
+}
+
+
+bool test_path_iter()
+{
+    world w;
+    point a(1,1), b(2,2), c(3,4), d(5,6);
+    w.add_path(path({a,b}));
+    w.add_path(path({c,d}));
+    std::vector<point> items;
+    for( auto const &seg : w.segments() ) {
+	items.push_back(seg.first());
+	items.push_back(seg.last());
+    }
+    std::vector<point> expected{a,b,c,d};
+    return items == expected;
 }

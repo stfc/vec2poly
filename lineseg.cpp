@@ -46,7 +46,7 @@ std::ostream &operator<<(std::ostream &os, lineseg const &line)
 }
 
 
-path::path(std::initializer_list<point> q)
+path::path(std::initializer_list<point> q) : path_(), used_(false)
 {
     if(q.size() < 1)
         throw BadPath();

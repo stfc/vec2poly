@@ -9,6 +9,7 @@
 #include <optional>
 #include <list>
 #include <iosfwd>
+#include <utility>
 #include "point.h"
 
 class BadLineSegment : public std::exception {
@@ -46,7 +47,10 @@ public:
 	return a_ == other.a_ && b_ == other.b_;
     }
     point first() const noexcept { return a_; }
+    point second() const noexcept { return b_; }
     point last() const noexcept { return b_; }
+    std::pair<point,point> endpoints() const noexcept { return std::pair(a_,b_); }
+
     /** Split a line segment into two parts at a given point along its length
      * The line segment is shortened and the remaining segment is returned.
      *
@@ -74,7 +78,12 @@ class world;
  */
 class path {
 private:
+    /** List of line segments forming this path.
+     * Line segments should be connected and non-degenerate (not a point)
+     */
     std::list<lineseg> path_;
+    /** Whether we have been assigned a polygon to live in */
+    bool used_;
 public:
     path(std::initializer_list<point> q);
     path(path const &) = delete;
@@ -82,7 +91,14 @@ public:
     path &operator=(path const &) = delete;
     path &operator=(path &&) = default;
 
+    bool is_used() const noexcept { return used_; }
+    void set_used() noexcept { used_ = true; }
+
     bool operator==(path const &) const noexcept = default;
+
+    auto begin() const noexcept { return path_.begin(); }
+    auto end() const noexcept { return path_.end(); }
+
     /* This breaks encapsulation but can be Fixed Later(tm) */
     friend class world;
     friend std::ostream &operator<<(std::ostream &, path const &);

@@ -6,6 +6,7 @@
 #define VEC2POLY_WORLD_H
 
 #include <vector>
+#include <ranges>
 #include "lineseg.h"
 
 /** World - the home of all paths */
@@ -64,6 +65,9 @@ private:
 public:
     void add_path(path &&p) { map_.push_back(std::move(p)); }
     void split_paths();
+
+    /** Iterator over all line segments */
+    auto segments() { return std::ranges::views::join(map_); }
 
     // regression testing
     friend bool test_poly1();
