@@ -15,7 +15,15 @@ bool expect(int i, lineseg const &, lineseg const &, std::optional<point>);
 [[nodiscard]] static bool test_lineseg();
 [[nodiscard]] bool test_poly1();
 [[nodiscard]] bool test_poly2();
-[[nodiscard]] bool test_path_iter();
+[[nodiscard]] static bool test_path_iter();
+[[nodiscard]] static bool test_branch_points();
+[[nodiscard]] static bool test_split_path();
+[[nodiscard]] static bool test_make_poly1();
+[[nodiscard]] static bool test_make_poly2();
+
+static world make_world(int);
+
+
 
 int tests()
 {
@@ -146,3 +154,29 @@ bool test_path_iter()
     std::vector<point> expected{a,b,c,d};
     return items == expected;
 }
+
+
+bool test_branch_points();
+bool test_split_path();
+bool test_make_poly1();
+bool test_make_poly2();
+
+
+world make_world(int k)
+{
+    world w;
+    // Triangle one
+    point c(-1,0), b(-3,0), a(-3, 2);
+    // Triangle two
+    point h(0,0), i(1,0), g(1,1);
+    // Connecting line
+    point d(-2,1), e(-1,2), f(0,2);
+    w.add_path(path{a,b,c,d,a});
+    w.add_path(path{d,e,f,g});
+    w.add_path(path{i,h,g,i});
+    if(k == 2) {
+	w.add_path(path{c,h});
+    }
+    return w;
+}
+

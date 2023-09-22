@@ -6,8 +6,18 @@
 #define VEC2POLY_WORLD_H
 
 #include <vector>
+#include <exception>
 #include <ranges>
 #include "lineseg.h"
+
+
+struct BadWorld : public std::exception
+{
+private:
+    //char *msg_;
+public:
+    char const *what() const noexcept override { return "Bad World"; }
+};
 
 /** World - the home of all paths */
 
@@ -64,7 +74,10 @@ private:
 
 public:
     void add_path(path &&p) { map_.push_back(std::move(p)); }
+    /** Split line segments at intersection points */
     void split_paths();
+    /** Reorder paths into proper paths */
+    void proper_paths();
 
     /** Iterator over all line segments */
     auto segments() { return std::ranges::views::join(map_); }
