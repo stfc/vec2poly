@@ -22,5 +22,7 @@ add_executable(vec2poly main.cpp
         tests.cpp
         world.cpp
         world.h
+        pntalloc.cpp
+        pntalloc.h
 )
 

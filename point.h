@@ -7,30 +7,28 @@
 
 #include <cmath>
 #include <iosfwd>
+#include <memory>
 
-class lineseg;
 
-class point {
+class pntalloc;
+
+
+class basepoint {
 private:
     double x_, y_;
-    int pid_;
-
-    /** Counter for unique point id */
-    static int pid_ctr;
-
 public:
-    point(double x, double y): x_(x), y_(y), pid_(++pid_ctr) {}
-    point(point const &) = default;
-    point(point &&) = default;
-    point &operator=(point const &) = default;
-    point &operator=(point &&) = default;
+    basepoint(double x, double y): x_(x), y_(y) {}
+    basepoint(basepoint const &) = default;
+    basepoint(basepoint &&) = default;
+    basepoint &operator=(basepoint const &) = default;
+    basepoint &operator=(basepoint &&) = default;
 
-    bool operator==(point const &other) const noexcept
+    bool operator==(basepoint const &other) const noexcept
     {
         auto sqr = [](double z) { return z*z; };
         return sqr(other.x_ - x_) + sqr(other.y_ - y_) < tol2;
     }
-    bool operator!=(point const &other) const noexcept
+    bool operator!=(basepoint const &other) const noexcept
     { return !(*this == other); }
 
     double x() const noexcept { return x_; }
@@ -38,14 +36,22 @@ public:
 
     static bool zero(double z) noexcept { return fabs(z)<tol; }
 
-    friend class lineseg;
-
     /** Tolerance for equality */
     static double tol;
     /** Tolerance for equality, squared */
     static double tol2;
 };
 
+
+using point = std::shared_ptr<basepoint>;
+
+// Equality between points is equivalent to equality of pointers due to their construction
+// (in pntalloc)
+#if 0
+bool operator==(point const &p, point const &q) { return *p == *q; }
+#endif
+
 std::ostream &operator<<(std::ostream &, point const &);
+
 
 #endif //VEC2POLY_POINT_H

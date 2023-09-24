@@ -49,7 +49,7 @@ void world::split_paths()
     while(p != z ) {
         iterator q = p; ++q;
         while(q != z ) {
-            auto u{intersects(*p,*q)};
+            auto u{intersects(alloc_, *p, *q)};
             if(u.has_value()) {
                 auto v{u.value()};
                 if(!p->is_endpoint(v)) {

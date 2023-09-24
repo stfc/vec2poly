@@ -9,6 +9,7 @@
 #include <exception>
 #include <ranges>
 #include "lineseg.h"
+#include "pntalloc.h"
 
 
 struct BadWorld : public std::exception
@@ -24,6 +25,9 @@ public:
 class world {
 private:
     std::vector<path> map_;
+
+    /* Point factory */
+    pntalloc alloc_;
 
     /* This iterator works like ranges::views::join, but we need both iterators
      * so we can insert stuff at the list iterator position (which does not
@@ -81,6 +85,9 @@ public:
 
     /** Iterator over all line segments */
     auto segments() { return std::ranges::views::join(map_); }
+
+    /** Forward point construction */
+    point make_point(double x, double y) { return alloc_.make_point(x, y); }
 
     // regression testing
     friend bool test_poly1();

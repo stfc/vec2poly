@@ -10,6 +10,7 @@
 #include <list>
 #include <iosfwd>
 #include <utility>
+#include <memory>
 #include "point.h"
 
 class BadLineSegment : public std::exception {
@@ -34,7 +35,7 @@ private:
     /** Once the points are defined we can calculate the vector A->B */
     double dx_, dy_;
 public:
-    lineseg(point a, point b) : a_(a), b_(b), dx_(b_.x_-a_.x_), dy_(b_.y_-a_.y_)
+    lineseg(point a, point b) : a_(a), b_(b), dx_(b_->x()-a_->x()), dy_(b_->y()-a_->y())
     {
 #if 0
         if(dx_*dx_+dy_*dy_ < point::tol2)
@@ -42,9 +43,10 @@ public:
 #endif
     }
 
+    /* Equality: are line segments equal if one is the reverse of the other? */
     bool operator==(lineseg const &other) const noexcept
     {
-	return a_ == other.a_ && b_ == other.b_;
+        return a_ == other.a_ && b_ == other.b_;
     }
     point first() const noexcept { return a_; }
     point second() const noexcept { return b_; }
@@ -66,7 +68,7 @@ public:
      */
     lineseg split_at(point p);
     bool is_endpoint(point p) const noexcept { return p == a_ || p == b_; }
-    friend std::optional<point> intersects(lineseg const &v, lineseg const &w);
+    friend std::optional<point> intersects(pntalloc &alloc, lineseg const &v, lineseg const &w);
     friend std::ostream &operator<<(std::ostream &, lineseg const &);
 };
 
@@ -86,6 +88,7 @@ private:
     bool used_;
 public:
     path(std::initializer_list<point> q);
+    path(pntalloc &alloc, std::initializer_list<std::pair<double, double>> q);
     path(path const &) = delete;
     path(path &&) = default;
     path &operator=(path const &) = delete;

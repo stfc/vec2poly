@@ -9,10 +9,14 @@
 #include <functional>
 #include "lineseg.h"
 #include "world.h"
+#include "pntalloc.h"
 
-bool expect(int i, lineseg const &, lineseg const &, std::optional<point>);
+bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<point>);
 
-[[nodiscard]] static bool test_lineseg();
+// Tests are sorted by increasing integratedness
+
+[[nodiscard]] bool test_pntalloc();
+[[nodiscard]] bool test_lineseg();
 [[nodiscard]] bool test_poly1();
 [[nodiscard]] bool test_poly2();
 [[nodiscard]] static bool test_path_iter();
@@ -29,7 +33,8 @@ int tests()
 {
     bool ret = true;
     unsigned num{0};
-    std::array<std::function<bool()>,4> all{test_lineseg, test_poly1, test_poly2, test_path_iter};
+    std::array<std::function<bool()>,5> all{test_pntalloc, test_lineseg, test_poly1, test_poly2,
+                                            test_path_iter};
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -49,30 +54,49 @@ int tests()
     return ret ? 0 : 1;
 }
 
+
+bool test_pntalloc()
+{
+    pntalloc z;
+    auto u1 = z.make_point(1,2);
+    auto u2 = z.make_point(3,4);
+    auto u3 = z.make_point(1,2);
+    for( auto const &p : z.points() )
+        std::cout << p << ' ' << p.use_count() << '\n';
+    return true;
+}
+
+
 bool
 test_lineseg()
 {
+    pntalloc u;
     // a b define a line y = x/3
     // c-f are collinear, on the line y = -2x+14
-    point a(0,0), b(9,3), c(4,6), d(5,4), e(6,2), f(7,0);
+    point   a = u.make_point(0,0),
+            b = u.make_point(9,3),
+            c = u.make_point(4,6),
+            d = u.make_point(5,4),
+            e = u.make_point(6,2),
+            f = u.make_point(7,0);
     lineseg ab(a,b);
     bool ret = true;
-    ret &= expect(1, ab, lineseg(c,f), e);
-    ret &= expect(2, ab, lineseg(c,d), std::nullopt);
-    ret &= expect(3, ab, lineseg(c,e), e);
-    ret &= expect(4, lineseg(a,e), lineseg(c,e), e);
-    lineseg gh(point(1,3),point(5,-1));
-    ret &= expect( 5, ab, gh, point(3,1));
-    ret &= expect(6, gh, ab, point(3,1));
+    ret &= expect(u, 1, ab, lineseg(c,f), e);
+    ret &= expect(u, 2, ab, lineseg(c,d), std::nullopt);
+    ret &= expect(u, 3, ab, lineseg(c,e), e);
+    ret &= expect(u, 4, lineseg(a,e), lineseg(c,e), e);
+    lineseg gh(u.make_point(1,3),u.make_point(5,-1));
+    ret &= expect(u, 5, ab, gh, u.make_point(3,1));
+    ret &= expect(u, 6, gh, ab, u.make_point(3,1));
     return ret;
 }
 
 
 bool
-expect(int i, lineseg const &v, lineseg const &w, std::optional<point> expt)
+expect(pntalloc &u, int i, lineseg const &v, lineseg const &w, std::optional<point> expt)
 {
     bool ret = true;
-    std::optional<point> z = intersects(v, w);
+    std::optional<point> z = intersects(u, v, w);
     if(z.has_value() && expt.has_value()) {
         if(z.value() != expt.value()) {
             std::cerr << "Test " << i << " expected " << expt.value() << " got " << z.value() << std::endl;
@@ -92,12 +116,19 @@ expect(int i, lineseg const &v, lineseg const &w, std::optional<point> expt)
 bool test_poly1()
 {
     world w;
+    pntalloc &u = w.alloc_;
     // World is empty, so should not iterate here
     for( auto const &y : w ) {
         std::cerr << "Error: World is not empty!\n";
         return false;
     }
-    point a(1,2), b(2,3), c(3,1), d(4,5), e(-1,-2), f(-2,-3), o(0,0);
+    point   a = u.make_point(1,2),
+            b = u.make_point(2,3),
+            c = u.make_point(3,1),
+            d = u.make_point(4,5),
+            e = u.make_point(-1,-2),
+            f = u.make_point(-2,-3),
+            o = u.make_point(0,0);
     // Two line segments: a->b and b->c
     w.add_path(path({a,b,c}));
     auto q = w.begin(); // point to first segment
@@ -132,24 +163,34 @@ bool test_poly1()
 bool test_poly2()
 {
     world w;
-    w.add_path(path{{-2,2},{-1,2},{-1,-2},{2,-2},{2,1},{3,2}});
-    w.add_path(path{{-3,1},{3,1}});
+    pntalloc &u = w.alloc_;
+    w.add_path(path{u, {{-2, 2},{-1,2},{-1,-2},{2,-2},{2,1},{3,2}}});
+    w.add_path(path{u, {{-3, 1},{3,1}}});
     w.split_paths();
-    return w.map_[0] == path({{-2,2},{-1,2},{-1,1},{-1,-2},{2,-2},{2,1},{3,2}})
-           && w.map_[1] == path{{-3,1},{-1,1},{2,1},{3,1}};
+    return w.map_[0] == path(u, {{-2, 2},
+                                 {-1, 2},
+                                 {-1, 1},
+                                 {-1, -2},
+                                 {2,  -2},
+                                 {2,  1},
+                                 {3,  2}})
+           && w.map_[1] == path{u, {{-3, 1},{-1,1},{2,1},{3,1}}};
 }
 
 
 bool test_path_iter()
 {
     world w;
-    point a(1,1), b(2,2), c(3,4), d(5,6);
+    point a = w.make_point(1,1),
+            b = w.make_point(2,2),
+            c = w.make_point(3,4),
+            d = w.make_point(5,6);
     w.add_path(path({a,b}));
     w.add_path(path({c,d}));
     std::vector<point> items;
     for( auto const &seg : w.segments() ) {
-	items.push_back(seg.first());
-	items.push_back(seg.last());
+        items.push_back(seg.first());
+        items.push_back(seg.last());
     }
     std::vector<point> expected{a,b,c,d};
     return items == expected;
@@ -166,16 +207,16 @@ world make_world(int k)
 {
     world w;
     // Triangle one
-    point c(-1,0), b(-3,0), a(-3, 2);
+    point c = w.make_point(-1,0), b = w.make_point(-3,0), a = w.make_point(-3, 2);
     // Triangle two
-    point h(0,0), i(1,0), g(1,1);
+    point h = w.make_point(0,0), i = w.make_point(1,0), g = w.make_point(1,1);
     // Connecting line
-    point d(-2,1), e(-1,2), f(0,2);
-    w.add_path(path{a,b,c,d,a});
-    w.add_path(path{d,e,f,g});
-    w.add_path(path{i,h,g,i});
+    point d = w.make_point(-2,1), e = w.make_point(-1,2), f = w.make_point(0,2);
+    w.add_path(path{{a,b,c,d,a}});
+    w.add_path(path{{d,e,f,g}});
+    w.add_path(path{{i,g,h,i}});
     if(k == 2) {
-	w.add_path(path{c,h});
+        w.add_path(path{{c,h}});
     }
     return w;
 }
