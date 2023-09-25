@@ -33,8 +33,8 @@ int tests()
 {
     bool ret = true;
     unsigned num{0};
-    std::array<std::function<bool()>,5> all{test_pntalloc, test_lineseg, test_poly1, test_poly2,
-                                            test_path_iter};
+    std::array<std::function<bool()>,6> all{test_pntalloc, test_lineseg, test_poly1, test_poly2,
+                                            test_path_iter, test_branch_points};
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -197,7 +197,18 @@ bool test_path_iter()
 }
 
 
-bool test_branch_points();
+bool test_branch_points()
+{
+    world w{make_world(2)};
+    // Expecting {-1,0},{0,0},{1,1},{-2,1}
+    // though not necessarily in that order
+    for( auto &p : w.branch_points() ) {
+        std::cout << p << '(' << p.use_count() << ')' << std::endl;
+    }
+    return true;
+}
+
+
 bool test_split_path();
 bool test_make_poly1();
 bool test_make_poly2();

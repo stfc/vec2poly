@@ -15,9 +15,12 @@
 struct BadWorld : public std::exception
 {
 private:
-    //char *msg_;
+    char const *msg_;
 public:
-    char const *what() const noexcept override { return "Bad World"; }
+    BadWorld() noexcept : msg_("Bad World") {};
+    // Note no copy is made of the string so it better be static
+    BadWorld(char const *msg) noexcept : msg_(msg) {}
+    char const *what() const noexcept override { return msg_; }
 };
 
 /** World - the home of all paths */
@@ -85,6 +88,24 @@ public:
 
     /** Iterator over all line segments */
     auto segments() { return std::ranges::views::join(map_); }
+
+    /** All branch points
+     * Throws BadWorld if an isolated point is found */
+    auto branch_points()
+    {
+        auto filter = [](point x) -> bool
+        {
+            // use_count is normally incidence plus one; here x is another copy
+            // so incidence is use count minus two
+            auto i = x.use_count()-2;
+            if(i == 1)
+                throw BadWorld("Unconnected line segment found");
+            return i>2;
+        };
+        return alloc_.points() | std::ranges::views::filter(filter);
+    }
+
+    auto points() { return alloc_.points(); }
 
     /** Forward point construction */
     point make_point(double x, double y) { return alloc_.make_point(x, y); }
