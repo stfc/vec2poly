@@ -80,6 +80,15 @@ private:
     iterator end() { return iterator(map_, false); }
 
 public:
+    /* We must prevent the world from being copied
+     * as it would currently invalidate the shared pointer counter
+     * which is used to track incidence to every point. */
+    world() = default;
+    world(world const &) = delete;
+    world(world &&) = default;
+    world &operator=(world const &) = delete;
+    world &operator=(world &&) = default;
+
     void add_path(path &&p) { map_.push_back(std::move(p)); }
     /** Split line segments at intersection points */
     void split_paths();
