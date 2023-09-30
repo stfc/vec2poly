@@ -91,7 +91,7 @@ public:
 
     void add_path(path &&p) { map_.push_back(std::move(p)); }
     /** Split line segments at intersection points */
-    void split_paths();
+    void split_segments();
     /** Reorder paths into proper paths */
     void proper_paths();
 
@@ -118,6 +118,8 @@ public:
 
     /** Forward point construction */
     point make_point(double x, double y) { return alloc_.make_point(x, y); }
+
+    friend std::ostream &operator<<(std::ostream &, world const &);
 
     // regression testing
     friend bool test_poly1();

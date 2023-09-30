@@ -21,7 +21,7 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 [[nodiscard]] bool test_poly2();
 [[nodiscard]] static bool test_path_iter();
 [[nodiscard]] static bool test_branch_points();
-[[nodiscard]] static bool test_split_path();
+[[nodiscard]] static bool test_path_split();
 [[nodiscard]] static bool test_make_poly1();
 [[nodiscard]] static bool test_make_poly2();
 
@@ -33,8 +33,8 @@ int tests()
 {
     bool ret = true;
     unsigned num{0};
-    std::array<std::function<bool()>,6> all{test_pntalloc, test_lineseg, test_poly1, test_poly2,
-                                            test_path_iter, test_branch_points};
+    std::array<std::function<bool()>,7> all{test_pntalloc, test_lineseg, test_poly1, test_poly2,
+                                            test_path_iter, test_branch_points, test_path_split};
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -166,7 +166,7 @@ bool test_poly2()
     pntalloc &u = w.alloc_;
     w.add_path(path{u, {{-2, 2},{-1,2},{-1,-2},{2,-2},{2,1},{3,2}}});
     w.add_path(path{u, {{-3, 1},{3,1}}});
-    w.split_paths();
+    w.split_segments();
     return w.map_[0] == path(u, {{-2, 2},
                                  {-1, 2},
                                  {-1, 1},
@@ -209,10 +209,33 @@ bool test_branch_points()
 }
 
 
-bool test_split_path();
+bool test_path_split()
+{
+    world w{make_world(1)};
+    w.proper_paths();
+    return true;
+}
+
+
 bool test_make_poly1();
 bool test_make_poly2();
 
+
+/* make_world returns a test setup with, if k==1, two components connected
+ * with a single path which does not turn into polygons.  However, if k==2
+ * an extra path is added which makes it possible to turn the entire graph
+ * into three polygons.
+ *
+ * The branching points for k==1 are {d,g}; for k==2, {c,d,g,h}
+ * The "proper paths" (possibly reversed) derived from the four paths
+ * for k==2 are:
+ * 1a. cbad
+ * 1b. cd
+ * 2. defg
+ * 3a. hg
+ * 3b. gih
+ * 4. ch
+ */
 
 world make_world(int k)
 {

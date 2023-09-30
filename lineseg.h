@@ -8,9 +8,11 @@
 #include <exception>
 #include <optional>
 #include <list>
+#include <set>
 #include <iosfwd>
 #include <utility>
 #include <memory>
+#include <functional>
 #include "point.h"
 
 class BadLineSegment : public std::exception {
@@ -53,6 +55,9 @@ public:
     point last() const noexcept { return b_; }
     std::pair<point,point> endpoints() const noexcept { return std::pair(a_,b_); }
 
+    /** Reverse in-place */
+    void rev() noexcept { std::swap(a_,b_); }
+
     /** Split a line segment into two parts at a given point along its length
      * The line segment is shortened and the remaining segment is returned.
      *
@@ -86,13 +91,24 @@ private:
     std::list<lineseg> path_;
     /** Whether we have been assigned a polygon to live in */
     bool used_;
+    /** Empty path constructer is private */
+    path() : path_{}, used_(false) {}
 public:
+    /** Construct path connecting at least two points */
     path(std::initializer_list<point> q);
+    /** Clunky low level c'tor used only for test code */
     path(pntalloc &alloc, std::initializer_list<std::pair<double, double>> q);
     path(path const &) = delete;
     path(path &&) = default;
     path &operator=(path const &) = delete;
     path &operator=(path &&) = default;
+
+    /** Split the path at every one of the given points
+     * Additional paths will be passed to the iterator
+     * @tparam newpath inserter callback for new paths
+     * @tparam at Points to split at
+     */
+    void split_path(std::function<void(path &&)> newpath, std::set<point> const &at);
 
     bool is_used() const noexcept { return used_; }
     void set_used() noexcept { used_ = true; }

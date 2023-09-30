@@ -5,6 +5,8 @@
 #include <cassert>
 #include <ranges>
 #include <iostream>
+#include <algorithm>
+#include <functional>
 #include "lineseg.h"
 #include "pntalloc.h"
 
@@ -70,6 +72,56 @@ path::path(pntalloc &alloc, std::initializer_list<std::pair<double, double>> q) 
         point w = alloc.make_point(x,y);
         path_.push_back(lineseg(prev, w));
         prev = w;
+    }
+}
+
+
+void path::split_path(std::function<void(path &&)> newpath, std::set<point> const &at)
+{
+    if(at.empty()) return;
+    auto p = path_.begin();
+    auto const q = path_.end();
+    // The path containing the first segment of the original path is a special case
+    // because it may need joining up to the very last path
+    // (if the path is a loop not starting in a point in the at set)
+    path first;
+    while( p != q ) {
+        // Find a line segment ending in any one of the target points
+        auto u = std::find_if(p, q,
+                              [&at](auto const &y) -> bool
+                              {
+                                  return at.contains(y.last());
+                              });
+        if(u == q) {
+            // No at-points at all on the path, nothing to do
+            if(first.path_.empty())
+                return;
+            // Otherwise check if we can splice the first path to the last
+            if(first.path_.front().first() == path_.back().last()) {
+                std::for_each(first.path_.begin(), first.path_.end(),
+                              [](lineseg &s) { s.rev(); });
+                std::reverse(first.path_.begin(), first.path_.end());
+                path_.splice(path_.end(), first.path_);
+                // No insertion for this path; it becomes the last
+                return;
+            }
+            // If we get here, first is non-empty but cannot be connected
+            // There will be trouble, later, but for now, save it
+            newpath(std::move(first));
+            return;
+        }
+        if(first.path_.empty())
+            first.path_.splice(first.path_.begin(), path_,
+                               p, u);
+        else {
+            // Otherwise p->u is to become a separate path
+            path next;
+            // Splicing lists does not invalidate iterators
+            next.path_.splice(next.begin(), path_, p, u);
+            newpath(std::move(next));
+        }
+        // And we continue processing the current path from u
+        p = ++u;
     }
 }
 
