@@ -199,7 +199,7 @@ bool test_path_iter()
 
 bool test_branch_points()
 {
-    world w{make_world(2)};
+    world w{make_world(4)};
     // Expecting {-1,0},{0,0},{1,1},{-2,1}
     // though not necessarily in that order
     for( auto &p : w.branch_points() ) {
@@ -212,7 +212,9 @@ bool test_branch_points()
 bool test_path_split()
 {
     world w{make_world(1)};
-    w.proper_paths();
+    std::set<point> at;
+    at.insert(w.make_point(-2,1)); // d
+    w.proper_paths({});
     return true;
 }
 
@@ -221,10 +223,11 @@ bool test_make_poly1();
 bool test_make_poly2();
 
 
-/* make_world returns a test setup with, if k==1, two components connected
- * with a single path which does not turn into polygons.  However, if k==2
- * an extra path is added which makes it possible to turn the entire graph
- * into three polygons.
+/* make_world returns a test setup with k paths (1..4)
+ * Path 1 is a triangle abcda
+ * Path 2 is a line defg
+ * Path 3 is another triangle ihgi
+ * Path 4 is another path between them, making three polygons
  *
  * The branching points for k==1 are {d,g}; for k==2, {c,d,g,h}
  * The "proper paths" (possibly reversed) derived from the four paths
@@ -247,9 +250,11 @@ world make_world(int k)
     // Connecting line
     point d = w.make_point(-2,1), e = w.make_point(-1,2), f = w.make_point(0,2);
     w.add_path(path{{a,b,c,d,a}});
-    w.add_path(path{{d,e,f,g}});
-    w.add_path(path{{i,g,h,i}});
-    if(k == 2) {
+    if(k>=2)
+        w.add_path(path{{d,e,f,g}});
+    if(k>=3)
+        w.add_path(path{{i,g,h,i}});
+    if(k == 4) {
         w.add_path(path{{c,h}});
     }
     return w;

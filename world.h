@@ -92,8 +92,9 @@ public:
     void add_path(path &&p) { map_.push_back(std::move(p)); }
     /** Split line segments at intersection points */
     void split_segments();
-    /** Reorder paths into proper paths */
-    void proper_paths();
+    /** Reorder paths into proper paths by ensuring endpoints in the set bps
+     * Default (if bps is empty) is to use the branch points */
+    void proper_paths(std::set<point> bps);
 
     /** Iterator over all line segments */
     auto segments() { return std::ranges::views::join(map_); }

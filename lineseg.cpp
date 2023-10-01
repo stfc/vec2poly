@@ -86,23 +86,20 @@ void path::split_path(std::function<void(path &&)> newpath, std::set<point> cons
     // (if the path is a loop not starting in a point in the at set)
     path first;
     while( p != q ) {
-        // Find a line segment ending in any one of the target points
+        // Find a line segment starting in any one of the target points
         auto u = std::find_if(p, q,
                               [&at](auto const &y) -> bool
                               {
-                                  return at.contains(y.last());
+                                  return at.contains(y.first());
                               });
         if(u == q) {
             // No at-points at all on the path, nothing to do
             if(first.path_.empty())
                 return;
             // Otherwise check if we can splice the first path to the last
-            if(first.path_.front().first() == path_.back().last()) {
-                std::for_each(first.path_.begin(), first.path_.end(),
-                              [](lineseg &s) { s.rev(); });
-                std::reverse(first.path_.begin(), first.path_.end());
+            if(first.path_.back().last() == path_.front().first()) {
                 path_.splice(path_.end(), first.path_);
-                // No insertion for this path; it becomes the last
+                // No insertion call for this path; it becomes *this
                 return;
             }
             // If we get here, first is non-empty but cannot be connected
@@ -123,6 +120,8 @@ void path::split_path(std::function<void(path &&)> newpath, std::set<point> cons
         // And we continue processing the current path from u
         p = ++u;
     }
+    if(!first.path_.empty())
+        path_.splice(path_.end(), first.path_);
 }
 
 
