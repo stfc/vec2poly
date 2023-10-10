@@ -15,15 +15,29 @@ class world;
 
 class pntalloc {
 private:
-    std::vector<point> mem_;
+    std::vector<pathpoint> mem_;
 
     pntalloc() noexcept;
 public:
-    point make_point(double x, double y);
+    pathpoint make_point(point z);
+    pathpoint make_point(double x, double y)
+    {
+        mem_.emplace_back(x,y);
+        return mem_.back();
+    }
 
     std::ranges::view auto points() noexcept
     {
         return std::ranges::views::all(mem_);
+    }
+
+    /** Look up a base point to see if it is a point */
+    ssize_t lookup(point bp)
+    {
+        auto y = std::ranges::find(mem_, bp);
+        if(y == mem_.cend())
+            return -1;
+        return y-mem_.cbegin();
     }
 
     // only world can create us

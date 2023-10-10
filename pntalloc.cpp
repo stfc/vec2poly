@@ -10,14 +10,14 @@
 pntalloc::pntalloc() noexcept {}
 
 
-point pntalloc::make_point(double x, double y)
+pathpoint pntalloc::make_point(point z)
 {
-    basepoint z(x,y);
-    auto u = std::find_if(mem_.cbegin(), mem_.cend(), [&z](auto const &p){ return z == *p; });
-    if( u == mem_.cend() ) {
-        mem_.push_back(std::make_shared<basepoint>(x, y));
-        // push back may have invalidated the iterators
+    auto const first{mem_.cbegin()}, last{mem_.cend()};
+    auto u = lookup(z);
+    if( u == -1 ) {
+        mem_.emplace_back(z);
         return mem_.back();
     }
-    return *u;
+    mem_[u].incf();
+    return mem_[u];
 }

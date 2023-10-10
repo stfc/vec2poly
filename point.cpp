@@ -5,12 +5,12 @@
 #include "point.h"
 #include <iostream>
 
-double basepoint::tol = 0.01;
-double basepoint::tol2 = basepoint::tol * basepoint::tol;
+double point::tol = 0.01;
+double point::tol2 = point::tol * point::tol;
 
 std::ostream &
-operator<<(std::ostream &os, point const &p)
+operator<<(std::ostream &os, pathpoint const &p)
 {
-    os << '(' << p->x() << ',' << p->y() << ')';
+    os << '(' << p.x() << ',' << p.y() << ')';
     return os;
 }

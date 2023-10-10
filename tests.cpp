@@ -11,7 +11,7 @@
 #include "world.h"
 #include "pntalloc.h"
 
-bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<point>);
+bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<pathpoint>);
 
 // Tests are sorted by increasing integratedness
 
@@ -73,19 +73,19 @@ test_lineseg()
     pntalloc u;
     // a b define a line y = x/3
     // c-f are collinear, on the line y = -2x+14
-    point   a = u.make_point(0,0),
+    pathpoint   a = u.make_point(0, 0),
             b = u.make_point(9,3),
             c = u.make_point(4,6),
             d = u.make_point(5,4),
             e = u.make_point(6,2),
             f = u.make_point(7,0);
-    lineseg ab(a,b);
+    lineseg ab(u, a, b);
     bool ret = true;
-    ret &= expect(u, 1, ab, lineseg(c,f), e);
-    ret &= expect(u, 2, ab, lineseg(c,d), std::nullopt);
-    ret &= expect(u, 3, ab, lineseg(c,e), e);
-    ret &= expect(u, 4, lineseg(a,e), lineseg(c,e), e);
-    lineseg gh(u.make_point(1,3),u.make_point(5,-1));
+    ret &= expect(u, 1, ab, lineseg(u, c, f), e);
+    ret &= expect(u, 2, ab, lineseg(u, c, d), std::nullopt);
+    ret &= expect(u, 3, ab, lineseg(u, c, e), e);
+    ret &= expect(u, 4, lineseg(u, a, e), lineseg(u, c, e), e);
+    lineseg gh(u, u.make_point(1, 3), u.make_point(5, -1));
     ret &= expect(u, 5, ab, gh, u.make_point(3,1));
     ret &= expect(u, 6, gh, ab, u.make_point(3,1));
     return ret;
@@ -93,10 +93,10 @@ test_lineseg()
 
 
 bool
-expect(pntalloc &u, int i, lineseg const &v, lineseg const &w, std::optional<point> expt)
+expect(pntalloc &u, int i, lineseg const &v, lineseg const &w, std::optional<pathpoint> expt)
 {
     bool ret = true;
-    std::optional<point> z = intersects(u, v, w);
+    std::optional<pathpoint> z = intersects(v, w);
     if(z.has_value() && expt.has_value()) {
         if(z.value() != expt.value()) {
             std::cerr << "Test " << i << " expected " << expt.value() << " got " << z.value() << std::endl;
@@ -122,7 +122,7 @@ bool test_poly1()
         std::cerr << "Error: World is not empty!\n";
         return false;
     }
-    point   a = u.make_point(1,2),
+    pathpoint   a = u.make_point(1, 2),
             b = u.make_point(2,3),
             c = u.make_point(3,1),
             d = u.make_point(4,5),
@@ -130,32 +130,32 @@ bool test_poly1()
             f = u.make_point(-2,-3),
             o = u.make_point(0,0);
     // Two line segments: a->b and b->c
-    w.add_path(path({a,b,c}));
+    w.add_path(path(u, {a, b, c}));
     auto q = w.begin(); // point to first segment
     ++q;		// point to second and last segment
     // Add c->d
-    q.insert_after(lineseg({c,d}));
-    if( w.map_[0] != path({a,b,c,d}) ) {
+    q.insert_after(lineseg(u,c,d));
+    if( w.map_[0] != path(u, {a, b, c, d})) {
         std::cerr << "Insertion failed: " << w.map_[0] << '\n';
         return false;
     }
     // Add e->f as a separate path
-    w.add_path(path({e,f}));
+    w.add_path(path(u, {e, f}));
     // Adding a path may have invalidated the iterator, so we refresh it
     q = w.begin(); ++q; ++q; ++q;
     // q should now reference the single line segment on the second path
-    q.insert_after(lineseg({f,o}));
+    q.insert_after(lineseg(u,f,o));
     if(w.map_.size() != 2) {
         std::cerr << "Expected two paths; found " << w.map_.size() << '\n';
         return false;
     }
-    if(w.map_[0] != path({a,b,c,d}) || w.map_[1] != path({e,f,o})) {
+    if(w.map_[0] != path(u, {a, b, c, d}) || w.map_[1] != path(u, {e, f, o})) {
         std::cerr << "Error with paths " << w.map_[0] << " or " << w.map_[1] << '\n';
         return false;
     }
     // Finally, an insert at not-the-end - q still points to the *first* entry on path 2
     // This is a dummy line segment, not usually useful (or permitted)
-    q.insert_after(lineseg({f,f}));
+    q.insert_after(lineseg(u,f,f));
     return true;
 }
 
@@ -181,18 +181,18 @@ bool test_poly2()
 bool test_path_iter()
 {
     world w;
-    point a = w.make_point(1,1),
+    pathpoint a = w.make_point(1, 1),
             b = w.make_point(2,2),
             c = w.make_point(3,4),
             d = w.make_point(5,6);
-    w.add_path(path({a,b}));
-    w.add_path(path({c,d}));
-    std::vector<point> items;
+    w.add_path({a, b});
+    w.add_path({c, d});
+    std::vector<pathpoint> items;
     for( auto const &seg : w.segments() ) {
         items.push_back(seg.first());
         items.push_back(seg.last());
     }
-    std::vector<point> expected{a,b,c,d};
+    std::vector<pathpoint> expected{a, b, c, d};
     return items == expected;
 }
 
@@ -212,7 +212,7 @@ bool test_branch_points()
 bool test_path_split()
 {
     world w{make_world(1)};
-    std::set<point> at;
+    std::set<pathpoint> at;
     at.insert(w.make_point(-2,1)); // d
     w.proper_paths({});
     return true;
@@ -244,18 +244,18 @@ world make_world(int k)
 {
     world w;
     // Triangle one
-    point c = w.make_point(-1,0), b = w.make_point(-3,0), a = w.make_point(-3, 2);
+    point c = point(-1, 0), b = point(-3, 0), a = point(-3, 2);
     // Triangle two
-    point h = w.make_point(0,0), i = w.make_point(1,0), g = w.make_point(1,1);
+    point h = point(0, 0), i = point(1, 0), g = point(1, 1);
     // Connecting line
-    point d = w.make_point(-2,1), e = w.make_point(-1,2), f = w.make_point(0,2);
-    w.add_path(path{{a,b,c,d,a}});
+    point d = w.make_point(-2, 1), e = w.make_point(-1, 2), f = w.make_point(0, 2);
+    w.add_path({a, b, c, d, a});
     if(k>=2)
-        w.add_path(path{{d,e,f,g}});
+        w.add_path({d, e, f, g});
     if(k>=3)
-        w.add_path(path{{i,g,h,i}});
+        w.add_path({i, g, h, i});
     if(k == 4) {
-        w.add_path(path{{c,h}});
+        w.add_path({c, h});
     }
     return w;
 }

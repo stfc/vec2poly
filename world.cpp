@@ -50,14 +50,14 @@ void world::split_segments()
     while(p != z ) {
         iterator q = p; ++q;
         while(q != z ) {
-            auto u{intersects(alloc_, *p, *q)};
+            auto u{intersects(*p, *q)};
             if(u.has_value()) {
                 auto v{u.value()};
                 if(!p->is_endpoint(v))
                     // split_at shortens the current line segment and returns the one to insert
-                    p.insert_after(p->split_at(v));
+                    p.insert_after(p->split_at(alloc_,v));
                 if(!q->is_endpoint(v))
-                    q.insert_after(q->split_at(v));
+                    q.insert_after(q->split_at(alloc_,v));
             }
             ++q;
         }

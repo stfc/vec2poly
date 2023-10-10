@@ -90,6 +90,10 @@ public:
     world &operator=(world &&) = default;
 
     void add_path(path &&p) { map_.push_back(std::move(p)); }
+    void add_path(std::initializer_list<point> const &p)
+    {
+        map_.emplace_back(alloc_, p);
+    }
     /** Split line segments at intersection points */
     void split_segments();
     /** Reorder paths into proper paths by ensuring endpoints in the set bps
@@ -103,11 +107,11 @@ public:
      * Throws BadWorld if an isolated point is found */
     auto branch_points()
     {
-        auto filter = [](point x) -> bool
+        auto filter = [](pathpoint x) -> bool
         {
             // use_count is normally incidence plus one; here x is another copy
             // so incidence is use count minus two
-            auto i = x.use_count()-2;
+            auto i = x.use_count();
             if(i == 1)
                 throw BadWorld("Unconnected line segment found");
             return i>2;
@@ -118,7 +122,7 @@ public:
     auto points() { return alloc_.points(); }
 
     /** Forward point construction */
-    point make_point(double x, double y) { return alloc_.make_point(x, y); }
+    pathpoint make_point(double x, double y) { return alloc_.make_point(x, y); }
 
     friend std::ostream &operator<<(std::ostream &, world const &);
 

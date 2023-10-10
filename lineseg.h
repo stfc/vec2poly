@@ -14,6 +14,7 @@
 #include <memory>
 #include <functional>
 #include "point.h"
+#include "pntalloc.h"
 
 class BadLineSegment : public std::exception {
     char const *const msg_;
@@ -33,11 +34,11 @@ public:
 class lineseg {
 private:
     /** The line segment is a point from A to B */
-    point a_, b_;
+    pathpoint a_, b_;
     /** Once the points are defined we can calculate the vector A->B */
     double dx_, dy_;
 public:
-    lineseg(point a, point b) : a_(a), b_(b), dx_(b_->x()-a_->x()), dy_(b_->y()-a_->y())
+    explicit lineseg(pntalloc &alloc, point a, point b) : a_(alloc.make_point(a)), b_(alloc.make_point(b)), dx_(b.x() - a.x()), dy_(b.y() - a.y())
     {
 #if 0
         if(dx_*dx_+dy_*dy_ < point::tol2)
@@ -50,10 +51,10 @@ public:
     {
         return a_ == other.a_ && b_ == other.b_;
     }
-    point first() const noexcept { return a_; }
-    point second() const noexcept { return b_; }
-    point last() const noexcept { return b_; }
-    std::pair<point,point> endpoints() const noexcept { return std::pair(a_,b_); }
+    pathpoint first() const noexcept { return a_; }
+    pathpoint second() const noexcept { return b_; }
+    pathpoint last() const noexcept { return b_; }
+    std::pair<pathpoint,pathpoint> endpoints() const noexcept { return std::pair(a_, b_); }
 
     /** Reverse in-place */
     void rev() noexcept { std::swap(a_,b_); }
@@ -71,9 +72,9 @@ public:
      * @param p The point to split at
      * @return The remaining segment (from the split point to B)
      */
-    lineseg split_at(point p);
-    bool is_endpoint(point p) const noexcept { return p == a_ || p == b_; }
-    friend std::optional<point> intersects(pntalloc &alloc, lineseg const &v, lineseg const &w);
+    lineseg split_at(pntalloc &alloc, point p);
+    bool is_endpoint(pathpoint p) const noexcept { return p == a_ || p == b_; }
+    friend std::optional<point> intersects(lineseg const &v, lineseg const &w);
     friend std::ostream &operator<<(std::ostream &, lineseg const &);
 };
 
@@ -95,9 +96,7 @@ private:
     path() : path_{}, used_(false) {}
 public:
     /** Construct path connecting at least two points */
-    path(std::initializer_list<point> q);
-    /** Clunky low level c'tor used only for test code */
-    path(pntalloc &alloc, std::initializer_list<std::pair<double, double>> q);
+    path(pntalloc &alloc, std::initializer_list<point> q);
     path(path const &) = delete;
     path(path &&) = default;
     path &operator=(path const &) = delete;
@@ -108,7 +107,7 @@ public:
      * @tparam newpath inserter callback for new paths
      * @tparam at Points to split at
      */
-    void split_path(std::function<void(path &&)> newpath, std::set<point> const &at);
+    void split_path(std::function<void(path &&)> newpath, const std::set<point> &at);
 
     bool is_used() const noexcept { return used_; }
     void set_used() noexcept { used_ = true; }
