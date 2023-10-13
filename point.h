@@ -55,24 +55,33 @@ public:
 std::ostream &operator<<(std::ostream &, point const &);
 
 
+class xpathpoint;
+using pathpoint = xpathpoint &;
+
 /** pathpoint is the point inside of a path */
-class pathpoint : public point
+class xpathpoint : public point
 {
     unsigned use_count_;
 public:
-    pathpoint(double x, double y) : point(x, y), use_count_(1) {}
-    pathpoint(point bp) : point(bp), use_count_(1) {}
-    pathpoint(pathpoint const &) = default;
-    pathpoint(pathpoint &&) = default;
-    pathpoint &operator=(pathpoint &o) = default;
-    pathpoint &operator=(pathpoint &&) = default;
-    ~pathpoint() {}
+    xpathpoint(double x, double y) : point(x, y), use_count_(1) {}
+    xpathpoint(point bp) : point(bp), use_count_(1) {}
+    xpathpoint(xpathpoint const &) = default;
+    xpathpoint(xpathpoint &&) = default;
+    xpathpoint &operator=(xpathpoint &o) = default;
+    xpathpoint &operator=(xpathpoint &&) = default;
+    ~xpathpoint() {}
 
     [[nodiscard]] auto use_count() const noexcept { return use_count_; }
 
     void incf() noexcept { ++use_count_; }
 
-    friend std::ostream &operator<<(std::ostream &, pathpoint const &);
+    bool equals(point o)
+    {
+        // Compare as points, ignoring the usage count
+        return *this == o;
+    }
+
+    friend std::ostream &operator<<(std::ostream &, pathpoint);
 };
 
 

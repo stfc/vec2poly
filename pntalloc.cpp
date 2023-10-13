@@ -7,15 +7,18 @@
 #include "pntalloc.h"
 
 
-pntalloc::pntalloc() noexcept {}
+pntalloc::pntalloc() noexcept
+{
+    // XXX temporary work
+    mem_.reserve(1000);
+}
 
 
 pathpoint pntalloc::make_point(point z)
 {
     auto u = lookup(z);
-    std::cerr << "MP " << u << std::endl;
     if( u == -1 ) {
-        mem_.emplace_back(z);
+        mem_.emplace_back(std::move(z));
         return mem_.back();
     }
     mem_[u].incf();

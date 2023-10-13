@@ -11,7 +11,7 @@
 #include "world.h"
 #include "pntalloc.h"
 
-bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<pathpoint>);
+bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<point>);
 
 // Tests are sorted by increasing integratedness
 
@@ -59,12 +59,11 @@ int tests()
 bool test_pntalloc()
 {
     pntalloc z;
-    auto u1 = z.make_point(1,2);
-    auto u2 = z.make_point(3,4);
-    auto u3 = z.make_point(1,2);
-    for( auto const &p : z.points() )
-        std::cout << p << ' ' << p.use_count() << '\n';
-    return true;
+    pathpoint u1 = z.make_point(1,2);
+    pathpoint u2 = z.make_point(3,4);
+    pathpoint u3 = z.make_point(1,2);
+    return u1 == u3 && u1.use_count() == 2 \
+        && u2.use_count() == 1 && u2 != u1;
 }
 
 
@@ -94,10 +93,10 @@ test_lineseg()
 
 
 bool
-expect(pntalloc &u, int i, lineseg const &v, lineseg const &w, std::optional<pathpoint> expt)
+expect(pntalloc &u, int i, lineseg const &v, lineseg const &w, std::optional<point> expt)
 {
     bool ret = true;
-    std::optional<pathpoint> z = intersects(v, w);
+    std::optional<point> z = intersects(v, w);
     if(z.has_value() && expt.has_value()) {
         if(z.value() != expt.value()) {
             std::cerr << "Test " << i << " expected " << expt.value() << " got " << z.value() << std::endl;
@@ -188,12 +187,12 @@ bool test_path_iter()
             d = {5,6};
     w.add_path({a, b});
     w.add_path({c, d});
-    std::vector<pathpoint> items;
+    std::vector<point> items;
     for( auto const &seg : w.segments() ) {
         items.push_back(seg.first());
         items.push_back(seg.last());
     }
-    std::vector<pathpoint> expected{a, b, c, d};
+    std::vector<point> expected{a, b, c, d};
     return items == expected;
 }
 
@@ -213,8 +212,8 @@ bool test_branch_points()
 bool test_path_split()
 {
     world w{make_world(1)};
-    std::set<pathpoint> at;
-    at.insert(w.make_point(-2,1)); // d
+    std::set<point> at;
+    at.insert(point(-2,1)); // d
     w.proper_paths({});
     return true;
 }

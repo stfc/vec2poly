@@ -54,10 +54,10 @@ public:
     pathpoint first() const noexcept { return a_; }
     pathpoint second() const noexcept { return b_; }
     pathpoint last() const noexcept { return b_; }
-    std::pair<pathpoint,pathpoint> endpoints() const noexcept { return std::pair(a_, b_); }
+    //std::pair<pathpoint,pathpoint> endpoints() const noexcept { return std::pair(a_, b_); }
 
     /** Reverse in-place */
-    void rev() noexcept { std::swap(a_,b_); }
+    //void rev() noexcept { std::swap(a_,b_); }
 
     /** Split a line segment into two parts at a given point along its length
      * The line segment is shortened and the remaining segment is returned.
@@ -73,7 +73,10 @@ public:
      * @return The remaining segment (from the split point to B)
      */
     lineseg split_at(pntalloc &alloc, point p);
-    bool is_endpoint(pathpoint p) const noexcept { return p == a_ || p == b_; }
+    bool is_endpoint(point p) const noexcept
+    {
+        return a_.equals(p) || b_.equals(p);
+    }
     friend std::optional<point> intersects(lineseg const &v, lineseg const &w);
     friend std::ostream &operator<<(std::ostream &, lineseg const &);
 };

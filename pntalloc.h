@@ -15,7 +15,7 @@ class world;
 
 class pntalloc {
 private:
-    std::vector<pathpoint> mem_;
+    std::vector<xpathpoint> mem_;
 
     pntalloc() noexcept;
 public:
