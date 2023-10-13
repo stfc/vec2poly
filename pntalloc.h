@@ -22,8 +22,8 @@ public:
     pathpoint make_point(point z);
     pathpoint make_point(double x, double y)
     {
-        mem_.emplace_back(x,y);
-        return mem_.back();
+        point q(x,y);
+        return make_point(q);
     }
 
     std::ranges::view auto points() noexcept

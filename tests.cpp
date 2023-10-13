@@ -33,6 +33,7 @@ int tests()
 {
     bool ret = true;
     unsigned num{0};
+    // Tests are to be run in this order
     std::array<std::function<bool()>,7> all{test_pntalloc, test_lineseg, test_poly1, test_poly2,
                                             test_path_iter, test_branch_points, test_path_split};
     for( auto testfunc : all ) {
@@ -122,13 +123,13 @@ bool test_poly1()
         std::cerr << "Error: World is not empty!\n";
         return false;
     }
-    pathpoint   a = u.make_point(1, 2),
-            b = u.make_point(2,3),
-            c = u.make_point(3,1),
-            d = u.make_point(4,5),
-            e = u.make_point(-1,-2),
-            f = u.make_point(-2,-3),
-            o = u.make_point(0,0);
+    point   a = {1, 2},
+            b = {2,3},
+            c = {3,1},
+            d = {4,5},
+            e = {-1,-2},
+            f = {-2,-3},
+            o = {0,0};
     // Two line segments: a->b and b->c
     w.add_path(path(u, {a, b, c}));
     auto q = w.begin(); // point to first segment
@@ -181,10 +182,10 @@ bool test_poly2()
 bool test_path_iter()
 {
     world w;
-    pathpoint a = w.make_point(1, 1),
-            b = w.make_point(2,2),
-            c = w.make_point(3,4),
-            d = w.make_point(5,6);
+    point   a = {1, 1},
+            b = {2,2},
+            c = {3,4},
+            d = {5,6};
     w.add_path({a, b});
     w.add_path({c, d});
     std::vector<pathpoint> items;
@@ -219,8 +220,17 @@ bool test_path_split()
 }
 
 
-bool test_make_poly1();
-bool test_make_poly2();
+bool test_make_poly1()
+{
+    return true;
+}
+
+
+bool test_make_poly2()
+{
+    return true;
+}
+
 
 
 /* make_world returns a test setup with k paths (1..4)

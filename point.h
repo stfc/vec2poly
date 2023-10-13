@@ -48,7 +48,12 @@ public:
     static double tol;
     /** Tolerance for equality, squared */
     static double tol2;
+
 };
+
+
+std::ostream &operator<<(std::ostream &, point const &);
+
 
 /** pathpoint is the point inside of a path */
 class pathpoint : public point

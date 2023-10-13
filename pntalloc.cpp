@@ -3,7 +3,7 @@
 //
 
 
-#include <algorithm>
+#include <iostream>
 #include "pntalloc.h"
 
 
@@ -12,8 +12,8 @@ pntalloc::pntalloc() noexcept {}
 
 pathpoint pntalloc::make_point(point z)
 {
-    auto const first{mem_.cbegin()}, last{mem_.cend()};
     auto u = lookup(z);
+    std::cerr << "MP " << u << std::endl;
     if( u == -1 ) {
         mem_.emplace_back(z);
         return mem_.back();
