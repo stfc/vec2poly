@@ -17,6 +17,7 @@ lineseg lineseg::split_at(pntalloc &alloc, point p)
         throw BadLineSegment();
     point const q{b_};
     b_ = alloc.make_point(p);
+    dx_ = b_.x() - a_.x(); dy_ = b_.y() - a_.y();
     return lineseg(alloc, p, q);
 }
 
