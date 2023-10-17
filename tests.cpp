@@ -62,8 +62,8 @@ bool test_pntalloc()
     pathpoint u1 = z.make_point(1,2);
     pathpoint u2 = z.make_point(3,4);
     pathpoint u3 = z.make_point(1,2);
-    return u1 == u3 && u1.use_count() == 2 \
-        && u2.use_count() == 1 && u2 != u1;
+    return u1 == u3 && u1->use_count() == 2 \
+        && u2->use_count() == 1 && u2 != u1;
 }
 
 
@@ -73,21 +73,21 @@ test_lineseg()
     pntalloc u;
     // a b define a line y = x/3
     // c-f are collinear, on the line y = -2x+14
-    pathpoint   a = u.make_point(0, 0),
-            b = u.make_point(9,3),
-            c = u.make_point(4,6),
-            d = u.make_point(5,4),
-            e = u.make_point(6,2),
-            f = u.make_point(7,0);
+    point   a = point(0, 0),
+            b = point(9,3),
+            c = point(4,6),
+            d = point(5,4),
+            e = point(6,2),
+            f = point(7,0);
     lineseg ab(u, a, b);
     bool ret = true;
     ret &= expect(u, 1, ab, lineseg(u, c, f), e);
     ret &= expect(u, 2, ab, lineseg(u, c, d), std::nullopt);
     ret &= expect(u, 3, ab, lineseg(u, c, e), e);
     ret &= expect(u, 4, lineseg(u, a, e), lineseg(u, c, e), e);
-    lineseg gh(u, u.make_point(1, 3), u.make_point(5, -1));
-    ret &= expect(u, 5, ab, gh, u.make_point(3,1));
-    ret &= expect(u, 6, gh, ab, u.make_point(3,1));
+    lineseg gh(u, point(1, 3), point(5, -1));
+    ret &= expect(u, 5, ab, gh, point(3,1));
+    ret &= expect(u, 6, gh, ab, point(3,1));
     return ret;
 }
 
@@ -189,8 +189,8 @@ bool test_path_iter()
     w.add_path({c, d});
     std::vector<point> items;
     for( auto const &seg : w.segments() ) {
-        items.push_back(seg.first());
-        items.push_back(seg.last());
+        items.push_back(*seg.first());
+        items.push_back(*seg.last());
     }
     std::vector<point> expected{a, b, c, d};
     return items == expected;
@@ -202,8 +202,8 @@ bool test_branch_points()
     world w{make_world(4)};
     // Expecting {-1,0},{0,0},{1,1},{-2,1}
     // though not necessarily in that order
-    for( auto &p : w.branch_points() ) {
-        std::cout << p << '(' << p.use_count() << ')' << std::endl;
+    for( auto p : w.branch_points() ) {
+        std::cout << p << '(' << p->use_count() << ')' << std::endl;
     }
     return true;
 }
@@ -257,7 +257,7 @@ world make_world(int k)
     // Triangle two
     point h = point(0, 0), i = point(1, 0), g = point(1, 1);
     // Connecting line
-    point d = w.make_point(-2, 1), e = w.make_point(-1, 2), f = w.make_point(0, 2);
+    point d = point(-2, 1), e = point(-1, 2), f = point(0, 2);
     w.add_path({a, b, c, d, a});
     if(k>=2)
         w.add_path({d, e, f, g});

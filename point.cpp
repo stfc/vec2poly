@@ -20,6 +20,6 @@ operator<<(std::ostream &os, point const &p)
 std::ostream &
 operator<<(std::ostream &os, pathpoint p)
 {
-    os << '(' << p.x() << ',' << p.y() << ")[" << p.use_count_ << "]";
+    os << '(' << p->x() << ',' << p->y() << ")[" << p->use_count_ << "]";
     return os;
 }

@@ -75,7 +75,7 @@ public:
     lineseg split_at(pntalloc &alloc, point p);
     bool is_endpoint(point p) const noexcept
     {
-        return a_.equals(p) || b_.equals(p);
+        return a_->equals(p) || b_->equals(p);
     }
     friend std::optional<point> intersects(lineseg const &v, lineseg const &w);
     friend std::ostream &operator<<(std::ostream &, lineseg const &);

@@ -73,7 +73,7 @@ void world::proper_paths(std::set<point> bps)
     // Collapse the view into a set, as in views.to(...) from C++23
     if(bps.empty())
         for( auto y: branch_points() )
-            bps.insert(y);
+            bps.insert(*y);
     auto inserter = [this](path &&p) { this->add_path(std::move(p)); };
     // debug just do the first one for now
     map_[0].split_path(inserter, bps);

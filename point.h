@@ -56,7 +56,7 @@ std::ostream &operator<<(std::ostream &, point const &);
 
 
 class xpathpoint;
-using pathpoint = xpathpoint &;
+using pathpoint = xpathpoint *;
 
 /** pathpoint is the point inside of a path */
 class xpathpoint : public point

@@ -19,8 +19,8 @@ pathpoint pntalloc::make_point(point z)
     auto u = lookup(z);
     if( u == -1 ) {
         mem_.emplace_back(std::move(z));
-        return mem_.back();
+        return &mem_.back();
     }
     mem_[u].incf();
-    return mem_[u];
+    return &mem_[u];
 }

@@ -15,9 +15,9 @@ lineseg lineseg::split_at(pntalloc &alloc, point p)
 {
     if(is_endpoint(p))
         throw BadLineSegment();
-    point const q{b_};
+    point const q{*b_};
     b_ = alloc.make_point(p);
-    dx_ = b_.x() - a_.x(); dy_ = b_.y() - a_.y();
+    dx_ = b_->x() - a_->x(); dy_ = b_->y() - a_->y();
     return lineseg(alloc, p, q);
 }
 
@@ -30,14 +30,14 @@ std::optional<point> intersects(lineseg const &v, lineseg const &w)
         return std::nullopt;
     // Vector to solve against (see docs for details)
 //    lineseg k(alloc, v.b_, w.b_);
-    auto kdx = w.b_.x()-v.b_.x(), kdy = w.b_.y()-v.b_.y();
+    auto kdx = w.b_->x()-v.b_->x(), kdy = w.b_->y()-v.b_->y();
     // s is the coefficient along v; t is the coefficient along w
     double s = (w.dy_ * kdx - w.dx_ * kdy)/det;
     double t = (v.dy_ * kdx - v.dx_ * kdy)/det;
     if(-point::tol < s && s < 1.0 + point::tol &&
        -point::tol < t && t < 1.0 + point::tol )
     {
-        point z{w.b_.x(), w.b_.y()};
+        point z{w.b_->x(), w.b_->y()};
         return point(z.x()-t*w.dx_,z.y()-t*w.dy_);
     }
     return std::nullopt;
@@ -78,7 +78,7 @@ void path::split_path(std::function<void(path &&)> newpath, const std::set<point
         auto u = std::find_if(p, q,
                               [&at](auto const &y) -> bool
                               {
-                                  return at.contains(static_cast<point>(y.first()));
+                                  return at.contains(static_cast<point>(*(y.first())));
                               });
         if(u == q) {
             // No at-points at all on the path, nothing to do

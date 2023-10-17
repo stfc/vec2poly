@@ -28,7 +28,7 @@ public:
 
     std::ranges::view auto points() noexcept
     {
-        return std::ranges::views::all(mem_);
+        return std::ranges::views::all(mem_) | std::views::transform([](auto &x) { return &x;});
     }
 
     /** Look up a base point to see if it is a point */
