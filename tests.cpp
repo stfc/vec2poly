@@ -6,7 +6,9 @@
 // #include <gtest/gtest.h>
 #include <iostream>
 #include <array>
+#include <map>
 #include <functional>
+#include <ranges>
 #include "lineseg.h"
 #include "world.h"
 #include "pntalloc.h"
@@ -167,14 +169,46 @@ bool test_poly2()
     w.add_path(path{u, {{-2, 2},{-1,2},{-1,-2},{2,-2},{2,1},{3,2}}});
     w.add_path(path{u, {{-3, 1},{3,1}}});
     w.split_segments();
-    return w.map_[0] == path(u, {{-2, 2},
-                                 {-1, 2},
-                                 {-1, 1},
-                                 {-1, -2},
-                                 {2,  -2},
-                                 {2,  1},
-                                 {3,  2}})
-           && w.map_[1] == path{u, {{-3, 1},{-1,1},{2,1},{3,1}}};
+    // These path comparisons reuse the same points, so only check path structure...
+    if( w.map_[0] != path(u, {{-2, 2},
+                              {-1, 2},
+                              {-1, 1},
+                              {-1, -2},
+                              {2,  -2},
+                              {2,  1},
+                              {3,  2}}) ) {
+        std::cerr << "poly2 first path mismatch\n";
+        return false;
+    }
+    if( w.map_[1] != path{u, {{-3, 1},{-1,1},{2,1},{3,1}}} ) {
+        std::cerr << "poly2 second path mismatch\n";
+        return false;
+    }
+    // ... so the final test checks the multiplicites
+    std::list<std::pair<point,unsigned int>> expect{{{-2,2},1},{{-1,2},2},{{-1,-2},2},{{2,-2},2},{{2,1},4},{{3,2},1},{{-3,1},1},{{-1,1},4},{{3,1},1}};
+    bool ret = 0;
+    for( auto const &y : u.points() ) {
+	std::cerr << "LOOK AT " << y << ' ';
+	point p{ static_cast<point>(*y) };
+	std::cerr << p << std::endl;
+	auto z = std::ranges::find_if( expect, [&p](std::pair<point,unsigned int> const &q) { return q.first == p; } );
+	if(z == expect.end()) {
+	    std::cerr << "poly2: unexpected point " << y << '\n';
+	    ret = 1;
+	} else {
+	    if( z->second != y->use_count() ) {
+		std::cerr << "poly2: " << y << " expected " << z->second << " count\n";
+		ret = 1;
+	    }
+	    expect.erase(z);
+	}
+    }
+    if( !expect.empty() ) {
+	for( const auto &[pt,val] : expect )
+	    std::cerr << "poly2: expected " << point(pt) << '[' << val << "]\n";
+	ret = 1;
+    }
+    return ret;
 }
 
 
@@ -201,11 +235,12 @@ bool test_branch_points()
 {
     world w{make_world(4)};
     // Expecting {-1,0},{0,0},{1,1},{-2,1}
+    std::set<point> const expect{{-1,0},{0,0},{1,1},{-2,1}};
+    std::set<point> found;
     // though not necessarily in that order
-    for( auto p : w.branch_points() ) {
-        std::cout << p << '(' << p->use_count() << ')' << std::endl;
-    }
-    return true;
+    for( auto p : w.branch_points() )
+        found.insert(*p);
+    return found == expect;
 }
 
 
