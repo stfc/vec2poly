@@ -38,13 +38,20 @@ private:
     /** Once the points are defined we can calculate the vector A->B */
     double dx_, dy_;
 public:
-    explicit lineseg(pntalloc &alloc, point a, point b) : a_(alloc.make_point(a)), b_(alloc.make_point(b)), dx_(b.x() - a.x()), dy_(b.y() - a.y())
+    lineseg(pntalloc &alloc, point a, point b) : a_(alloc.make_point(a)), b_(alloc.make_point(b)), dx_(b.x() - a.x()), dy_(b.y() - a.y())
     {
 #if 0
         if(dx_*dx_+dy_*dy_ < point::tol2)
             throw BadLineSegment();
 #endif
     }
+    lineseg(pntalloc &alloc, point a, pathpoint b) : a_(alloc.make_point(a)), b_(b) {}
+    lineseg(pntalloc &, pathpoint a, pathpoint b) noexcept : a_(a), b_(b) {}
+    lineseg(lineseg const &) = delete;
+    lineseg(lineseg &&) = default;
+    lineseg &operator=(lineseg const &) = delete;
+    lineseg &operator=(lineseg &&) = default;
+    ~lineseg() {}
 
     /* Equality: are line segments equal if one is the reverse of the other? */
     bool operator==(lineseg const &other) const noexcept

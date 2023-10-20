@@ -74,6 +74,7 @@ public:
     [[nodiscard]] auto use_count() const noexcept { return use_count_; }
 
     void incf() noexcept { ++use_count_; }
+    void decf() { if(!(use_count_--)) throw std::out_of_range("decr use count below zero"); }
 
     bool equals(point o)
     {
