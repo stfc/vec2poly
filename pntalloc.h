@@ -45,6 +45,7 @@ public:
     // and the unit tests
     friend bool test_pntalloc();
     friend bool test_lineseg();
+    friend bool test_split_seg();
 };
 
 

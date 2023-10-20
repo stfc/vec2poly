@@ -17,12 +17,21 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 
 // Tests are sorted by increasing integratedness
 
+/** Test basic pathpoint allocator */
 [[nodiscard]] bool test_pntalloc();
+/** Test line segments and their intersections */
 [[nodiscard]] bool test_lineseg();
+/** Test splitting line segment into two */
+[[nodiscard]] bool test_split_seg();
+/** Test inserter into path */
 [[nodiscard]] bool test_poly1();
+/** Test splitting paths at intersections */
 [[nodiscard]] bool test_poly2();
+/** Test path iterator - which iterates over segments */
 [[nodiscard]] static bool test_path_iter();
+/** Test finding branch points (nodes of degree > 2) */
 [[nodiscard]] static bool test_branch_points();
+/** Test reorganising the path into "proper" paths starting and ending in branch points */
 [[nodiscard]] static bool test_path_split();
 [[nodiscard]] static bool test_make_poly1();
 [[nodiscard]] static bool test_make_poly2();
@@ -36,14 +45,16 @@ int tests()
     bool ret = true;
     unsigned num{0};
     // Tests are to be run in this order
-    std::array<std::function<bool()>,7> all{test_pntalloc, test_lineseg, test_poly1, test_poly2,
-                                            test_path_iter, test_branch_points, test_path_split};
+    std::array<std::function<bool()>,8> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
+                                            test_poly2, test_path_iter, test_branch_points, test_path_split};
     for( auto testfunc : all ) {
         ++num;
         try {
             bool result = testfunc();
-            if(!result)
+            if(!result) {
                 std::cerr << "Test " << num << " failed with no exception raised\n";
+                return 1;
+            }
         }
         catch (BadLineSegment &bad) {
             std::cerr << "Test " << num << ": Bad Line Segment exception " << bad.what() << std::endl;
@@ -115,6 +126,34 @@ expect(pntalloc &u, int i, lineseg const &v, lineseg const &w, std::optional<poi
 }
 
 
+bool test_split_seg()
+{
+    pntalloc u;
+    point a(-1,-1), b(2,1), c(3, 0);
+    lineseg ac(u,a,c);
+    // Splitting at b should turn a->c into a->b while returning b->c
+    auto bc{ac.split_at(u,b)};
+    auto a1{ac.first()}, b1{ac.last()}, b2{bc.first()}, c2{bc.last()};
+    bool ret = true;
+    if(*a1 != a || a1->use_count() != 1) {
+        std::cerr << "split a expected " << a << "[1], got " << a1 << std::endl;
+        ret = false;
+    }
+    if(*b1 != b || b1->use_count() != 2) {
+        std::cerr << "split b expected " << b << "[2], got " << b1 << std::endl;
+        ret = false;
+    }
+    if(b1 != b2) {
+        std::cerr << "split end segment 1 doesn't match start of 2: " << b1 << ' ' << b2 << std::endl;
+        ret = false;
+    }
+    if(*c2 != c || c2->use_count() != 1) {
+        std::cerr << "split c expected " << c << "[1], got " << c2 << std::endl;
+        ret = false;
+    }
+}
+
+
 bool test_poly1()
 {
     world w;
@@ -178,30 +217,30 @@ bool test_poly2()
                               {2,  1},
                               {3,  2}}) ) {
         std::cerr << "poly2 first path mismatch\n";
+        std::cerr << w.map_[0] << std::endl;
         return false;
     }
     if( w.map_[1] != path{u, {{-3, 1},{-1,1},{2,1},{3,1}}} ) {
         std::cerr << "poly2 second path mismatch\n";
+        std::cerr << w.map_[1] << std::endl;
         return false;
     }
     // ... so the final test checks the multiplicites
     std::list<std::pair<point,unsigned int>> expect{{{-2,2},1},{{-1,2},2},{{-1,-2},2},{{2,-2},2},{{2,1},4},{{3,2},1},{{-3,1},1},{{-1,1},4},{{3,1},1}};
     bool ret = 0;
     for( auto const &y : u.points() ) {
-	std::cerr << "LOOK AT " << y << ' ';
-	point p{ static_cast<point>(*y) };
-	std::cerr << p << std::endl;
-	auto z = std::ranges::find_if( expect, [&p](std::pair<point,unsigned int> const &q) { return q.first == p; } );
-	if(z == expect.end()) {
-	    std::cerr << "poly2: unexpected point " << y << '\n';
-	    ret = 1;
-	} else {
-	    if( z->second != y->use_count() ) {
-		std::cerr << "poly2: " << y << " expected " << z->second << " count\n";
-		ret = 1;
-	    }
-	    expect.erase(z);
-	}
+        point p{ static_cast<point>(*y) };
+        auto z = std::ranges::find_if( expect, [&p](std::pair<point,unsigned int> const &q) { return q.first == p; } );
+        if(z == expect.end()) {
+            std::cerr << "poly2: unexpected point " << y << '\n';
+            ret = 1;
+        } else {
+            if( z->second != y->use_count() ) {
+                std::cerr << "poly2: " << y << " expected " << z->second << " count\n";
+                ret = 1;
+            }
+            expect.erase(z);
+        }
     }
     if( !expect.empty() ) {
 	for( const auto &[pt,val] : expect )

@@ -15,7 +15,7 @@ lineseg lineseg::split_at(pntalloc &alloc, point p)
 {
     if(is_endpoint(p))
         throw BadLineSegment();
-    point const q{*b_};
+    pathpoint const q{b_};
     b_ = alloc.make_point(p);
     dx_ = b_->x() - a_->x(); dy_ = b_->y() - a_->y();
     return lineseg(alloc, p, q);
@@ -58,7 +58,7 @@ path::path(pntalloc &alloc, std::initializer_list<point> q) : path_(), used_(fal
     // adjacent/pairwise not available until C++23... and zip
     point prev{*q.begin()};
     for( auto const &y : std::ranges::views::drop(q, 1)) {
-        path_.push_back(lineseg(alloc, prev, y));
+        path_.emplace_back(alloc, prev, y);
         prev = y;
     }
 }
