@@ -226,27 +226,29 @@ bool test_poly2()
         std::cerr << w.map_[1] << std::endl;
         return false;
     }
-    // ... so the final test checks the multiplicites
+    // ... so the final test checks the multiplicites;
+    // however, the previous tests, having visited all the points, have precisely
+    // doubled all the expected multiplicities because they have the same line segments
     std::list<std::pair<point,unsigned int>> expect{{{-2,2},1},{{-1,2},2},{{-1,-2},2},{{2,-2},2},{{2,1},4},{{3,2},1},{{-3,1},1},{{-1,1},4},{{3,1},1}};
-    bool ret = 0;
+    bool ret = true;
     for( auto const y : u.points() ) {
         point p{ static_cast<point>(*y) };
         auto z = std::ranges::find_if( expect, [&p](std::pair<point,unsigned int> const &q) { return q.first == p; } );
         if(z == expect.end()) {
             std::cerr << "poly2: unexpected point " << y << '\n';
-            ret = 1;
+            ret = false;
         } else {
-            if( z->second != y->use_count() ) {
+            if( 2 * z->second != y->use_count() ) {
                 std::cerr << "poly2: " << y << " expected " << z->second << " count\n";
-                ret = 1;
+                ret = false;
             }
             expect.erase(z);
         }
     }
     if( !expect.empty() ) {
-	for( const auto &[pt,val] : expect )
-	    std::cerr << "poly2: expected " << point(pt) << '[' << val << "]\n";
-	ret = 1;
+        for( const auto &[pt,val] : expect )
+            std::cerr << "poly2: expected " << point(pt) << '[' << val << "]\n";
+        ret = false;
     }
     return ret;
 }
