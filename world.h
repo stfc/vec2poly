@@ -50,22 +50,21 @@ private:
             }
         }
         iterator &operator++() noexcept;
-	iterator operator++(int) noexcept { auto i{*this}; ++(*this); return i; }
+        iterator operator++(int) noexcept { auto i{*this}; ++(*this); return i; }
         bool operator==(const iterator &other)
-	{
-	    /* Could check the sentinels (cs_ and other.cs_):
-	     * If the sentinels differ, then we are iterators for different sequences,
-	     * or one iterator has been invalidated. */
-	    if(cc_ != other.cc_)
-		return false;
-	    /* dc_ iterator is valid only if cc_ is not equal to cs_ */
-	    if(cc_ == cs_)
-		return other.cc_ == other.cs_;
-	    else
-		if(other.cc_ == other.cs_)
-		    return false;
-	    return dc_ == other.dc_;
-	}
+        {
+            /* Could check the sentinels (cs_ and other.cs_):
+             * If the sentinels differ, then we are iterators for different sequences,
+             * or one iterator has been invalidated. */
+            if(cc_ != other.cc_)
+                return false;
+            /* dc_ iterator is valid only if cc_ is not equal to cs_ */
+            if(cc_ == cs_)
+                return other.cc_ == other.cs_;
+            else if(other.cc_ == other.cs_)
+                return false;
+            return dc_ == other.dc_;
+        }
         auto &operator*() { return *dc_; }
         auto *operator->() { return &(*dc_); }
 
@@ -89,7 +88,7 @@ public:
     world &operator=(world const &) = delete;
     world &operator=(world &&) = default;
 
-    void add_path(path &&p) { map_.push_back(std::move(p)); }
+    void add_path(path &&p) { map_.emplace_back(std::forward<path>(p)); }
     void add_path(std::initializer_list<point> const &p)
     {
         map_.emplace_back(alloc_, p);

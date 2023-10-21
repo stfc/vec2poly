@@ -37,6 +37,11 @@ private:
     pathpoint a_, b_;
     /** Once the points are defined we can calculate the vector A->B */
     double dx_, dy_;
+    void recalculate()
+    {
+        dx_ = b_->x() - a_->x();
+        dy_ = b_->y() - a_->y();
+    }
 public:
     lineseg(pntalloc &alloc, point a, point b) : a_(alloc.make_point(a)), b_(alloc.make_point(b)), dx_(b.x() - a.x()), dy_(b.y() - a.y())
     {
@@ -45,8 +50,14 @@ public:
             throw BadLineSegment();
 #endif
     }
-    lineseg(pntalloc &alloc, point a, pathpoint b) : a_(alloc.make_point(a)), b_(b) {}
-    lineseg(pntalloc &, pathpoint a, pathpoint b) noexcept : a_(a), b_(b) {}
+    lineseg(pntalloc &alloc, point a, pathpoint b) : a_(alloc.make_point(a)), b_(b)
+    {
+        recalculate();
+    }
+    lineseg(pntalloc &, pathpoint a, pathpoint b) noexcept : a_(a), b_(b)
+    {
+        recalculate();
+    }
     lineseg(lineseg const &) = delete;
     lineseg(lineseg &&) = default;
     lineseg &operator=(lineseg const &) = delete;

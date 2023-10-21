@@ -229,7 +229,7 @@ bool test_poly2()
     // ... so the final test checks the multiplicites
     std::list<std::pair<point,unsigned int>> expect{{{-2,2},1},{{-1,2},2},{{-1,-2},2},{{2,-2},2},{{2,1},4},{{3,2},1},{{-3,1},1},{{-1,1},4},{{3,1},1}};
     bool ret = 0;
-    for( auto const &y : u.points() ) {
+    for( auto const y : u.points() ) {
         point p{ static_cast<point>(*y) };
         auto z = std::ranges::find_if( expect, [&p](std::pair<point,unsigned int> const &q) { return q.first == p; } );
         if(z == expect.end()) {
