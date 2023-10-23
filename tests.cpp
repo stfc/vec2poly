@@ -291,7 +291,7 @@ bool test_path_split()
     world w{make_world(1)};
     std::set<point> at;
     at.insert(point(-2,1)); // d
-    w.proper_paths({});
+    w.proper_paths(at);
     return true;
 }
 

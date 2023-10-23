@@ -74,9 +74,8 @@ void world::proper_paths(std::set<point> bps)
     if(bps.empty())
         for( auto y: branch_points() )
             bps.insert(*y);
-    auto inserter = [this](path &&p) { this->add_path(std::move(p)); };
     // debug just do the first one for now
-    map_[0].split_path(inserter, bps);
+    auto result = map_[0].split_path(bps);
     std::cerr << *this;
 }
 
