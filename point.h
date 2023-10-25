@@ -17,37 +17,29 @@ class pntalloc;
 class point {
 private:
     /** x and y coordinates of point */
-    double x_, y_;
+    signed long x_, y_;
 public:
-    point(double x, double y): x_(x), y_(y) {}
+    point(double x, double y): x_(std::round(x/tol)), y_(std::round(y/tol)) {}
 
-    bool operator==(point const &other) const noexcept
-    {
-        auto sqr = [](double z) { return z*z; };
-        return sqr(other.x_ - x_) + sqr(other.y_ - y_) < tol2;
-    }
-    bool operator!=(point const &other) const noexcept
-    { return !(*this == other); }
+    bool operator==(point const &other) const noexcept = default;
+    bool operator!=(point const &other) const noexcept = default;
     bool operator<(point const &other) const noexcept
     {
         if(*this == other) return false;
-        if(x_ < other.x_-tol) {
-            if(y_ < other.y_-tol)
+        if(x_ < other.x_) {
+            if(y_ < other.y_)
                 return true;
         }
-        // Lexicographic: x1==x2, y1<y2
-        return x_ < other.x_+tol && y_ < other.y_-tol;
+        return x_ == other.x_ && y_ < other.y_;
     }
 
-    [[nodiscard]] double x() const noexcept { return x_; }
-    [[nodiscard]] double y() const noexcept { return y_; }
+    [[nodiscard]] double x() const noexcept { return x_*tol; }
+    [[nodiscard]] double y() const noexcept { return y_*tol; }
 
     static bool zero(double z) noexcept { return fabs(z)<tol; }
 
     /** Tolerance for equality */
     static double tol;
-    /** Tolerance for equality, squared */
-    static double tol2;
 
 };
 

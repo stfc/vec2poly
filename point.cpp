@@ -6,7 +6,6 @@
 #include <iostream>
 
 double point::tol = 0.01;
-double point::tol2 = point::tol * point::tol;
 
 
 std::ostream &
