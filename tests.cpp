@@ -289,8 +289,8 @@ bool test_branch_points()
 bool test_path_split()
 {
     world w{make_world(1)};
-    std::set<point> at;
-    at.insert(point(-2,1)); // d
+    std::vector<point> at;
+    at.push_back(point(-2,1)); // d
     w.proper_paths(at);
     return true;
 }

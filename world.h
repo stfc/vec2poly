@@ -97,7 +97,7 @@ public:
     void split_segments();
     /** Reorder paths into proper paths by ensuring endpoints in the set bps
      * Default (if bps is empty) is to use the branch points */
-    void proper_paths(std::set<point> bps);
+    void proper_paths(std::vector<point> bps);
 
     /** Iterator over all line segments */
     auto segments() { return std::ranges::views::join(map_); }

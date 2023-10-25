@@ -129,7 +129,7 @@ public:
      * @tparam newpath inserter callback for new paths
      * @tparam at Points to split at
      */
-    std::vector<path> split_path(const std::set<point> &at);
+    std::vector<path> split_path(const std::vector<point> &at);
 
     bool is_used() const noexcept { return used_; }
     void set_used() noexcept { used_ = true; }

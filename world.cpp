@@ -66,14 +66,14 @@ void world::split_segments()
 }
 
 
-void world::proper_paths(std::set<point> bps)
+void world::proper_paths(std::vector<point> bps)
 {
     if(map_.empty()) return;
     // Proper paths begin and end in branch points
     // Collapse the view into a set, as in views.to(...) from C++23
     if(bps.empty())
         for( auto y: branch_points() )
-            bps.insert(*y);
+            bps.push_back(*y);
     // debug just do the first one for now
     auto result = map_[0].split_path(bps);
     std::cerr << *this;

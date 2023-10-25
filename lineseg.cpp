@@ -69,7 +69,7 @@ path::path(path const &other) : path_(other.path_), used_(other.used_)
 }
 
 
-std::vector<path> path::split_path(const std::set<point> &at)
+std::vector<path> path::split_path(const std::vector<point> &at)
 {
     if(at.empty()) return {};
     auto p = path_.begin();
@@ -84,7 +84,8 @@ std::vector<path> path::split_path(const std::set<point> &at)
         auto u = std::find_if(p, q,
                               [&at](auto const &y) -> bool
                               {
-                                  return at.contains(static_cast<point>(*(y.first())));
+                                 point w = *(y.first());
+                                 return std::find( at.cbegin(), at.cend(), w ) != at.cend();
                               });
         if(u == q) {
             // No remaining at-points on the path, nothing left to do
