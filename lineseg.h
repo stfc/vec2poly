@@ -114,7 +114,7 @@ private:
     std::list<lineseg> path_;
     /** Whether we have been assigned a polygon to live in */
     bool used_;
-    /** Empty path constructer is private */
+    /** Empty path constructor is private as worlds are not allowed to have empty paths */
     path() : path_{}, used_(false) {}
 public:
     /** Construct path connecting at least two points */

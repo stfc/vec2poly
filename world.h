@@ -125,9 +125,10 @@ public:
 
     friend std::ostream &operator<<(std::ostream &, world const &);
 
-    // regression testing
+    // regression testing functions break encapsulation
+    friend pntalloc &test_allocator(world &);
+    friend decltype(world::map_) &test_paths(world &);
     friend bool test_poly1();
-    friend bool test_poly2();
 };
 
 

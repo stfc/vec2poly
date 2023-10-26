@@ -38,6 +38,18 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 
 static world make_world(int);
 
+/** Utility function for test code to access the World's paths */
+decltype(world::map_) &test_paths(world &w)
+{
+    return w.map_;
+}
+
+
+/** Utility function for test code to access the World's allocator */
+pntalloc &test_allocator(world &w)
+{
+    return w.alloc_;
+}
 
 
 int tests()
@@ -158,7 +170,7 @@ bool test_split_seg()
 bool test_poly1()
 {
     world w;
-    pntalloc &u = w.alloc_;
+    pntalloc &u = test_allocator(w);
     // World is empty, so should not iterate here
     for( auto const &y : w ) {
         std::cerr << "Error: World is not empty!\n";
@@ -177,8 +189,9 @@ bool test_poly1()
     ++q;		// point to second and last segment
     // Add c->d
     q.insert_after(lineseg(u,c,d));
-    if( w.map_[0] != path(u, {a, b, c, d})) {
-        std::cerr << "Insertion failed: " << w.map_[0] << '\n';
+    auto &map = test_paths(w);
+    if( map[0] != path(u, {a, b, c, d})) {
+        std::cerr << "Insertion failed: " << map[0] << '\n';
         return false;
     }
     // Add e->f as a separate path
@@ -187,12 +200,12 @@ bool test_poly1()
     q = w.begin(); ++q; ++q; ++q;
     // q should now reference the single line segment on the second path
     q.insert_after(lineseg(u,f,o));
-    if(w.map_.size() != 2) {
-        std::cerr << "Expected two paths; found " << w.map_.size() << '\n';
+    if(map.size() != 2) {
+        std::cerr << "Expected two paths; found " << map.size() << '\n';
         return false;
     }
-    if(w.map_[0] != path(u, {a, b, c, d}) || w.map_[1] != path(u, {e, f, o})) {
-        std::cerr << "Error with paths " << w.map_[0] << " or " << w.map_[1] << '\n';
+    if(map[0] != path(u, {a, b, c, d}) || map[1] != path(u, {e, f, o})) {
+        std::cerr << "Error with paths " << map[0] << " or " << map[1] << '\n';
         return false;
     }
     // Finally, an insert at not-the-end - q still points to the *first* entry on path 2
@@ -205,25 +218,26 @@ bool test_poly1()
 bool test_poly2()
 {
     world w;
-    pntalloc &u = w.alloc_;
+    pntalloc &u = test_allocator(w);
     w.add_path(path{u, {{-2, 2},{-1,2},{-1,-2},{2,-2},{2,1},{3,2}}});
     w.add_path(path{u, {{-3, 1},{3,1}}});
     w.split_segments();
     // These path comparisons reuse the same points, so only check path structure...
-    if( w.map_[0] != path(u, {{-2, 2},
-                              {-1, 2},
-                              {-1, 1},
-                              {-1, -2},
-                              {2,  -2},
-                              {2,  1},
-                              {3,  2}}) ) {
+    auto &map = test_paths(w);
+    if( map[0] != path(u, {{-2, 2},
+                           {-1, 2},
+                           {-1, 1},
+                           {-1, -2},
+                           {2,  -2},
+                           {2,  1},
+                           {3,  2}}) ) {
         std::cerr << "poly2 first path mismatch\n";
-        std::cerr << w.map_[0] << std::endl;
+        std::cerr << map[0] << std::endl;
         return false;
     }
-    if( w.map_[1] != path{u, {{-3, 1},{-1,1},{2,1},{3,1}}} ) {
+    if( map[1] != path{u, {{-3, 1},{-1,1},{2,1},{3,1}}} ) {
         std::cerr << "poly2 second path mismatch\n";
-        std::cerr << w.map_[1] << std::endl;
+        std::cerr << map[1] << std::endl;
         return false;
     }
     // ... so the final test checks the multiplicites;
@@ -286,13 +300,32 @@ bool test_branch_points()
 }
 
 
-bool test_path_split()
+bool test_path_split1(std::vector<point> const &at, std::initializer_list<std::initializer_list<point>> y)
 {
     world w{make_world(1)};
+    pntalloc &u = test_allocator(w);
+    w.proper_paths(at);
+    std::vector<path> paths;
+    for( auto &x : y )
+	paths.emplace_back(u, x);
+    auto &map{test_paths(w)};
+    return map.size() == 1 && map[0] == paths[0];
+}
+
+
+bool test_path_split2()
+{
+    return true;
+}
+
+
+bool test_path_split()
+{
     std::vector<point> at;
     at.push_back(point(-2,1)); // d
-    w.proper_paths(at);
-    return true;
+    if(!test_path_split1(at, {{{-2,1},{-3,2},{-3,0},{-1,0},{-2,1}}}))
+	return false;
+    return test_path_split2();
 }
 
 
