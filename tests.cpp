@@ -351,6 +351,14 @@ bool test_path_split()
     at.push_back(point(-2,1)); // d
     if(!test_path_split1(at, {{{-2,1},{-3,2},{-3,0},{-1,0},{-2,1}}}))
 	return false;
+    at.clear();
+    at.emplace_back(1,0);
+    at.emplace_back(-3,2); // a
+    at.emplace_back(-1,0); // c
+    at.emplace_back(1,1);
+    if(!test_path_split1(at, {{{-3,2},{-3,0},{-1,0}},{{-1,0},{-2,1},{-3,2}}}))
+	return false;
+
     return test_path_split2();
 }
 
