@@ -9,6 +9,7 @@
 #include <map>
 #include <functional>
 #include <ranges>
+#include <algorithm>
 #include "lineseg.h"
 #include "world.h"
 #include "pntalloc.h"
@@ -304,12 +305,37 @@ bool test_path_split1(std::vector<point> const &at, std::initializer_list<std::i
 {
     world w{make_world(1)};
     pntalloc &u = test_allocator(w);
+
+    // This is the actual code we're testing
     w.proper_paths(at);
-    std::vector<path> paths;
+
+    std::vector<path> expected;
     for( auto &x : y )
-	paths.emplace_back(u, x);
+        expected.emplace_back(u, x);
     auto &map{test_paths(w)};
-    return map.size() == 1 && map[0] == paths[0];
+    if(map.empty()) {
+        std::cerr << "pathsplit1 no paths returned - not possible!\n";
+        return false;
+    }
+
+    bool ret = true;
+    // Check whether expected paths match reality
+    for( path const &p : map ) {
+        auto found = std::ranges::find( expected, p );
+        if( found == expected.end() ) {
+            std::cerr << "pathsplit1 got unexpected path " << p << std::endl;
+            ret = false;
+        } else {
+            expected.erase(found);	
+        }
+    }
+    for( auto const &p : expected ) {
+        std::cerr << "pathsplit1 expected path " << p << " not found\n";
+        ret = false;
+    }
+    if(!ret)
+        std::cerr << "pathsplit1 (used " << at << " to split\n";
+    return ret;
 }
 
 

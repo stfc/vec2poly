@@ -8,6 +8,8 @@
 #include <cmath>
 #include <iosfwd>
 #include <memory>
+// vector is only needed for the ostream of vectors of points
+#include <vector>
 
 
 class pntalloc;
@@ -45,6 +47,10 @@ public:
 
 
 std::ostream &operator<<(std::ostream &, point const &);
+
+std::ostream &operator<<(std::ostream &, std::vector<point> const &);
+
+
 
 
 class xpathpoint;
