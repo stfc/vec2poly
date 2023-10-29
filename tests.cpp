@@ -334,14 +334,8 @@ bool test_path_split1(std::vector<point> const &at, std::initializer_list<std::i
         ret = false;
     }
     if(!ret)
-        std::cerr << "pathsplit1 (used " << at << " to split\n";
+        std::cerr << "pathsplit1 (used " << at << " to split)\n";
     return ret;
-}
-
-
-bool test_path_split2()
-{
-    return true;
 }
 
 
@@ -349,17 +343,24 @@ bool test_path_split()
 {
     std::vector<point> at;
     at.push_back(point(-2,1)); // d
+    // Result should be a single path d->a->b->c->d
     if(!test_path_split1(at, {{{-2,1},{-3,2},{-3,0},{-1,0},{-2,1}}}))
-	return false;
+        return false;
     at.clear();
     at.emplace_back(1,0);
     at.emplace_back(-3,2); // a
     at.emplace_back(-1,0); // c
     at.emplace_back(1,1);
+    // Result should be two paths a->b->c and c->d->a
     if(!test_path_split1(at, {{{-3,2},{-3,0},{-1,0}},{{-1,0},{-2,1},{-3,2}}}))
-	return false;
-
-    return test_path_split2();
+        return false;
+    at.clear();
+    at.emplace_back(-1,0); // c
+    at.emplace_back(-3,0); // b
+    // Result should be two paths b->c and c->d->a->b
+    if(!test_path_split1(at,{{{-3,2},{-3,0}},{{-3,0},{-1,0}},{{-1,0},{-2,1},{-3,2}}}))
+        return false;
+    return true;
 }
 
 

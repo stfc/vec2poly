@@ -39,6 +39,18 @@ void world::iterator::insert_after(lineseg &&elt)
 }
 
 
+void world::import(std::vector<path> &paths)
+{
+    auto s1 = map_.size(), s2 = paths.size();
+    map_.reserve(s1+s2);
+    for( decltype(s2) j = 0; j < s2; ++j) {
+        // order doesn't matter, though it will copy the paths
+        map_.push_back(paths.back());
+        paths.pop_back();
+    }
+}
+
+
 void world::split_segments()
 {
     iterator p = begin();
@@ -75,8 +87,11 @@ void world::proper_paths(std::vector<point> bps)
     if(bps.empty())
         for( auto y: branch_points() )
             bps.push_back(*y);
-    // debug just do the first one for now
-    auto result = map_[0].split_path(bps);
+    std::vector<path> results;
+    // Iterators are not invalidated as we gather results before adding them
+    for( path &p : map_ )
+        p.split_path(results, bps);
+    import(results);
 }
 
 

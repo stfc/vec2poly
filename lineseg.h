@@ -59,7 +59,7 @@ public:
         recalculate();
     }
     /* Note copying a line segment should not increase the use counter */
-    lineseg(lineseg const &) = default;;
+    lineseg(lineseg const &) = default;
     lineseg(lineseg &&) = default;
     lineseg &operator=(lineseg const &) = delete;
     lineseg &operator=(lineseg &&) = default;
@@ -119,9 +119,9 @@ private:
 public:
     /** Construct path connecting at least two points */
     path(pntalloc &alloc, std::initializer_list<point> q);
-    path(path const &other);
+    path(path const &);
     path(path &&) = default;
-    path &operator=(path const &) = delete;
+    path &operator=(path const &) = default;
     path &operator=(path &&) = default;
 
     /** Split the path at every one of the given points
@@ -129,7 +129,7 @@ public:
      * @tparam newpath inserter callback for new paths
      * @tparam at Points to split at
      */
-    std::vector<path> split_path(const std::vector<point> &at);
+    void split_path(std::vector<path> &result, const std::vector<point> &at);
 
     bool is_used() const noexcept { return used_; }
     void set_used() noexcept { used_ = true; }

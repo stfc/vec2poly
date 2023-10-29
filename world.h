@@ -93,6 +93,9 @@ public:
     {
         map_.emplace_back(alloc_, p);
     }
+    /** Import paths by moving them */
+    void import(std::vector<path> &);
+
     /** Split line segments at intersection points */
     void split_segments();
     /** Reorder paths into proper paths by ensuring endpoints in the set bps

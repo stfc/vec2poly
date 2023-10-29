@@ -69,16 +69,18 @@ path::path(path const &other) : path_(other.path_), used_(other.used_)
 }
 
 
-std::vector<path> path::split_path(const std::vector<point> &at)
+void path::split_path(std::vector<path> &result, const std::vector<point> &at)
 {
-    if(at.empty()) return {};
-    auto p = path_.begin();
+    if(at.empty()) return;
+    // p is the main iterator, tracking the search for points to split at;
+    // r lags behind p - or equals p - to track the start of the next path
+    auto p = path_.begin(), r = p;
     auto const q = path_.end();
     // The path containing the first segment of the original path is a special case
     // because it may need joining up to the very last path
     // (if the path is a loop not starting in a point in the at set)
     path first;
-    std::vector<path> result;
+    bool done_first = false;
     while( p != q ) {
         // Find a line segment starting in any one of the target points
         auto u = std::find_if(p, q,
@@ -89,28 +91,31 @@ std::vector<path> path::split_path(const std::vector<point> &at)
                               });
         if(u == q) {
             // No remaining at-points on the path, nothing left to do
-	    // so the current path (*this) will be the last
+            // so the current path (*this) will be the last
             if(first.path_.empty())
-                return result;
+                return;
             // Otherwise check if we can splice the first path to the last
             if(first.path_.back().last() == path_.front().first()) {
                 path_.splice(path_.end(), first.path_);
                 // No insertion call for this path; it remains *this
-                return result;
+                return;
             }
             // If we get here, first is non-empty but cannot be connected
             // There will be trouble, later, but for now, save it
             result.push_back(first);
-            return result;
+            return;
         }
-        if(first.path_.empty())
+        if(!done_first) {
             first.path_.splice(first.path_.begin(), path_,
-                               p, u);
-        else {
+                               r, u);
+            r = u;
+            done_first = true;
+        } else {
             // Otherwise p->u is to become a separate path
             path next;
             // Splicing lists does not invalidate iterators
-            next.path_.splice(next.begin(), path_, p, u);
+            next.path_.splice(next.begin(), path_, r, u);
+            r = u;
             result.push_back(next);
         }
         // And we continue processing the current path from u
@@ -118,13 +123,13 @@ std::vector<path> path::split_path(const std::vector<point> &at)
     }
     if(!first.path_.empty())
         path_.splice(path_.end(), first.path_);
-    return result;
+    return;
 }
 
 
 std::ostream &operator<<(std::ostream &os, path const &p)
 {
     for(auto const &p : p.path_)
-	os << p;
+        os << p;
     return os;
 }
