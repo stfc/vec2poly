@@ -1,7 +1,9 @@
 * Worry about numerical stability in intersects()
 * Auto-derive sensible tolerance value from input parameters
-  * Permit a snap-to-grid instead of just Euclidean distance?
+  * Permit a snap-to-grid instead of just Euclidean distance? [DONE]
 * Doesn't detect (much less handle) line segments that intersect in more than one pathpoint (ie parallel and overlapping)
 * Link test code only for debug builds (or use a test framework like gtest?)
 * Prevent code outside of the pathpoint factory generating points?
 * Error messages should be a bit more informative - like where in the data the error was found
+* When stepping the world iterator over all line segments, inside a path the next segment will always meet the previous in their single shared point.
+  Thus, for the purposes of finding unknown intersections between segments, one can always skip the next one unless it belongs to another path.

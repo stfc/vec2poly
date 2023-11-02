@@ -23,9 +23,13 @@ public:
     char const *what() const noexcept override { return msg_; }
 };
 
-/** World - the home of all paths */
+/** World - the home of all paths
+ *
+ * The world is not really an object, it is the entire program...
+ * but it's convenient to have it structured as an object to aid testing
+ */
 
-class world {
+class world final {
 private:
     std::vector<path> map_;
 
