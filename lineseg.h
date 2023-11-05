@@ -124,8 +124,14 @@ public:
     path &operator=(path const &) = default;
     path &operator=(path &&) = default;
 
-    /** Split the path at every one of the given points
-     * Additional paths will be passed to the iterator
+    /** Return a pair of first and last point */
+    auto endpoints() const
+    {
+        return std::make_pair(path_.front().first(), path_.back().last());
+    }
+
+    /** Split the path at every one of the given points.
+     * Additional paths will be added to the result vector.
      * @tparam newpath inserter callback for new paths
      * @tparam at Points to split at
      */

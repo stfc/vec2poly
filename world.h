@@ -111,7 +111,7 @@ public:
 
     /** All branch points
      * Throws BadWorld if an isolated point is found */
-    auto branch_points()
+    [[nodiscard]] auto branch_points()
     {
         auto filter = [](pathpoint x) -> bool
         {

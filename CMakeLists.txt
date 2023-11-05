@@ -12,7 +12,7 @@ project(vec2poly)
 
 set(CMAKE_CXX_STANDARD 20)
 
-
+find_package(boost_headers REQUIRED COMPONENTS graph)
 
 add_executable(vec2poly main.cpp
         point.cpp
@@ -24,5 +24,7 @@ add_executable(vec2poly main.cpp
         world.h
         pntalloc.cpp
         pntalloc.h
+        graph-path.cpp
+        graph-path.h
 )
 

@@ -13,6 +13,7 @@
 #include "lineseg.h"
 #include "world.h"
 #include "pntalloc.h"
+#include "graph-path.h"
 
 bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<point>);
 
@@ -34,6 +35,7 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 [[nodiscard]] static bool test_branch_points();
 /** Test reorganising the path into "proper" paths starting and ending in branch points */
 [[nodiscard]] static bool test_path_split();
+/** Testing the polygon edge iterator */
 [[nodiscard]] static bool test_make_poly1();
 [[nodiscard]] static bool test_make_poly2();
 
@@ -58,8 +60,9 @@ int tests()
     bool ret = true;
     unsigned num{0};
     // Tests are to be run in this order
-    std::array<std::function<bool()>,8> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
-                                            test_poly2, test_path_iter, test_branch_points, test_path_split};
+    std::array<std::function<bool()>,10> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
+                                            test_poly2, test_path_iter, test_branch_points, test_path_split,
+                                            test_make_poly1, test_make_poly2 };
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -366,6 +369,29 @@ bool test_path_split()
 
 bool test_make_poly1()
 {
+    polygon p(4,0);
+    p.add_edge(0,1,100);
+    p.add_edge(1,2,101);
+    p.add_edge(2,3,102);
+    p.add_edge(3,0,103);
+    auto it = p.begin(), end = p.end();
+    for(int i = 1; i <= 4; ++i) {
+        if(it == end) {
+            std::cerr << "poly1 premature end of iterator at iteration " << i << std::endl;
+            return false;
+        }
+        auto v = *it;
+        // The iterator works *backwards* through the edges
+        if(v != 104-i) {
+            std::cerr << "poly1 iteration " << i << " got " << v << std::endl;
+            return false;
+        }
+        ++it;
+    }
+    if(it != end) {
+        std::cerr << "poly1 expected iterator end" << std::endl;
+        return false;
+    }
     return true;
 }
 
