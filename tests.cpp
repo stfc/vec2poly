@@ -2,8 +2,6 @@
 // Created by jens on 09/09/23.
 //
 
-// TODO migrate to gtest?
-// #include <gtest/gtest.h>
 #include <iostream>
 #include <array>
 #include <map>
@@ -398,6 +396,8 @@ bool test_make_poly1()
 
 bool test_make_poly2()
 {
+    world w{make_world(4)};
+    graph g(w);
     return true;
 }
 

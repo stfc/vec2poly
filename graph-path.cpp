@@ -8,7 +8,16 @@
 #include "world.h"
 
 
-using Graph = boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS >;
+struct VertexProp
+{
+};
+
+struct EdgeProp
+{
+    edge_t index;
+};
+
+using Graph = boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS, VertexProp, EdgeProp >;
 
 using Edge = std::pair<int, int>;
 
@@ -64,9 +73,15 @@ graph &graph::operator=(graph &&) = default;
 graph::~graph() = default;
 
 
-void graph::add_path(const path &p)
+void graph::add_path(const path &p, edge_t i)
 {
-
+    auto endpoints = p.endpoints();
+    Vertex src = vertex(endpoints.first), dst = vertex(endpoints.second);
+    EdgeProp data{i};
+    auto flops = boost::add_edge(src, dst, data, impl_->g_);
+    // Failure happens if the edge already exists
+    if(!flops.second)
+	throw BadGraph("failed to add edge");
 }
 
 
@@ -94,6 +109,8 @@ public:
     void tree_edge( auto e, Graph const &g )
     {
         auto src = static_cast<node_t>(boost::source(e,g)), dst = static_cast<node_t>(boost::target(e, g));
+        // Upstream edge index from the bundled property
+        edge_t edge = g[e].index;
         // insert if missing but do not overwrite existing entry
         p_.add_edge(src, dst, edge);
         /* Shortcut spanning subtree generation after we find the target */
@@ -116,6 +133,6 @@ polygon graph::find_polygon()
         return result;
     }
 
-    std::cerr << "Not found\n";
+    throw BadGraph("no polygon found");
 
 }

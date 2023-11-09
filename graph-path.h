@@ -104,7 +104,7 @@ public:
     /** Return the node number of a given world point */
     node_t vertex(pathpoint);
 
-    void add_path(path const &);
+    void add_path(path const &, edge_t);
 
     polygon find_polygon();
 };
