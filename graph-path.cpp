@@ -15,6 +15,10 @@ struct VertexProp
 struct EdgeProp
 {
     edge_t index;
+    bool used;
+    // Discourage empty construction
+    EdgeProp() = delete;
+    explicit EdgeProp(edge_t i, bool u = false) : index(i), used(u) {}
 };
 
 using Graph = boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS, VertexProp, EdgeProp >;
@@ -30,12 +34,10 @@ struct graphimpl
     Graph g_;
     /** Nodes are non-negative integers */
     std::map<pathpoint,node_t> vertex_;
-    /** Track whether a path has been used */
-    std::vector<bool> used_;
     /** Value of next new node to be added
      * or, equivalently, the size (number of nodes) */
     node_t n_;
-    graphimpl(node_t size) : g_(size), vertex_(), used_(size, false), n_(size) {}
+    graphimpl(node_t size) : g_(size), vertex_(), n_(size) {}
 };
 
 
@@ -59,6 +61,23 @@ static std::unique_ptr<graphimpl> make_graphimpl(world &w)
 }
 
 
+/** Helper function for graph::find_polygon
+ * Find a path not yet used in a polygon
+ */
+static auto find_unused(Graph &g)
+{
+    using iterator = boost::graph_traits<Graph>::edge_iterator;
+    std::pair<iterator,iterator> range = boost::edges(g);
+    iterator e = std::find_if( range.first, range.second,
+            [&g](auto r) { return !g[r].used; }
+            );
+    if(e == range.second)
+        // Maybe rename the exception because this is a good thing..
+        throw BadGraph("No more edges");
+    return *e;
+}
+
+
 graph::graph(world &w) : impl_(make_graphimpl(w))
 {
     /* At this point in construction, the graph has been set up but has no edges */
@@ -77,11 +96,11 @@ void graph::add_path(const path &p, edge_t i)
 {
     auto endpoints = p.endpoints();
     Vertex src = vertex(endpoints.first), dst = vertex(endpoints.second);
-    EdgeProp data{i};
+    EdgeProp data{i, false};
     auto flops = boost::add_edge(src, dst, data, impl_->g_);
     // Failure happens if the edge already exists
     if(!flops.second)
-	throw BadGraph("failed to add edge");
+        throw BadGraph("failed to add edge");
 }
 
 
@@ -123,6 +142,8 @@ public:
 
 polygon graph::find_polygon()
 {
+    // find_unused throws an exception if no path is found
+    auto p = find_unused(impl_->g_);
     Vertex start{0}; // FIXME
     polygon result(impl_->n_, start);
     visitor vis(5, result);
