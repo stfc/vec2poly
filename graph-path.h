@@ -8,18 +8,19 @@
 #include <vector>
 #include <ranges>
 #include "lineseg.h"
+#include "except.h"
 
 typedef unsigned long node_t;
 typedef unsigned long edge_t;
 
 
-class BadGraph : public std::exception
+struct BadGraph : public Vec2PolyException
 {
-    char const *msg_;
-public:
-    BadGraph(char const *msg) noexcept : msg_(msg) {}
-    char const *what() const noexcept override { return msg_; }
+    BadGraph(std::string &&msg) : Vec2PolyException(std::forward<std::string>(msg)) {}
+    BadGraph(char const *msg) : Vec2PolyException(msg) {}
+    BadGraph(std::string_view msg) : Vec2PolyException(msg) {}
 };
+
 
 class polygon {
     /** The ith index is j if node i is first reached from j */
@@ -113,6 +114,12 @@ public:
     graph &operator=(graph const &) = delete;
     graph &operator=(graph &&);
     ~graph();
+
+    /** Dummy exception for find_unused to signal nothing else to do */
+    struct AllDone
+    {
+    };
+
 
     /** Return the node number of a given world point */
     node_t vertex(pathpoint);

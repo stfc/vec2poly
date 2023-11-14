@@ -28,6 +28,7 @@ using Edge = std::pair<int, int>;
 using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
 
 
+
 struct graphimpl
 {
     /** Boost implementation of graph */
@@ -72,14 +73,16 @@ static auto find_unused(Graph &g)
             [&g](auto r) { return !g[r].used; }
             );
     if(e == range.second)
-        // Maybe rename the exception because this is a good thing..
-        throw BadGraph("No more edges");
+        throw graph::AllDone();
     return *e;
 }
 
 
 graph::graph(world &w) : impl_(make_graphimpl(w))
 {
+    // DEBUG
+    for( auto [pp,val] : impl_->vertex_ )
+	std::cerr << "DEBUG " << pp << " - " << val <<  std::endl;
     /* At this point in construction, the graph has been set up but has no edges
      * Now add the edges - which will also create the vertices - in the graph
      */
@@ -111,8 +114,10 @@ void graph::add_path(const path &p, edge_t i)
 node_t graph::vertex(pathpoint p)
 {
     auto q = impl_->vertex_.find(p);
-    if(q == impl_->vertex_.end())
-        throw BadGraph("Unknown vertex");
+    if(q == impl_->vertex_.end()) {
+	std::string msg("Unknown vertex ");
+        throw BadGraph(msg);
+    }
     return q->second;
 }
 
@@ -152,7 +157,14 @@ polygon graph::find_polygon()
     node_t start = boost::source(e, impl_->g_), target = boost::target(e, impl_->g_);
 
     polygon result(impl_->n_, start);
-    visitor vis(target, result);
+    // The current edge will form the first edge of the polygon
+    result.add_edge(start, target, impl_->g_[e].index);
+
+    // For the search we need to connect the target to the starting point
+    // because we are making a return path around the unused edge
+    visitor vis(start, result);
+
+    // XXX temporarily remove the current edge/path to find alternative path
     try {
         boost::breadth_first_search( impl_->g_, start, boost::visitor(vis) );
     }

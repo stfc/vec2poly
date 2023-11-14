@@ -188,7 +188,7 @@ bool test_poly1()
     // Two line segments: a->b and b->c
     w.add_path(path(u, {a, b, c}));
     auto q = w.begin(); // point to first segment
-    ++q;		// point to second and last segment
+    ++q;        	// point to second and last segment
     // Add c->d
     q.insert_after(lineseg(u,c,d));
     auto &map = test_paths(w);
@@ -327,7 +327,7 @@ bool test_path_split1(std::vector<point> const &at, std::initializer_list<std::i
             std::cerr << "pathsplit1 got unexpected path " << p << std::endl;
             ret = false;
         } else {
-            expected.erase(found);	
+            expected.erase(found);        
         }
     }
     for( auto const &p : expected ) {
@@ -402,6 +402,11 @@ bool test_make_poly2()
         auto poly = g.find_polygon();
         for( auto x : poly )
             std::cerr << x << '\n';
+    }
+    catch( graph::AllDone )
+    {
+        std::cerr << "poly2: unexpected early end of paths\n";
+        return false;
     }
     catch( BadGraph const &e )
     {
