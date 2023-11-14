@@ -80,8 +80,12 @@ static auto find_unused(Graph &g)
 
 graph::graph(world &w) : impl_(make_graphimpl(w))
 {
-    /* At this point in construction, the graph has been set up but has no edges */
-
+    /* At this point in construction, the graph has been set up but has no edges
+     * Now add the edges - which will also create the vertices - in the graph
+     */
+    edge_t e{0};  // edge indices start from 0 (like an indexed view)
+    for( path const &y : w.paths() )
+        add_path( y, e++ );
 }
 
 // Why are these here and not in the header?  See Meyers' Modern C++ item 22
@@ -143,10 +147,12 @@ public:
 polygon graph::find_polygon()
 {
     // find_unused throws an exception if no path is found
-    auto p = find_unused(impl_->g_);
-    Vertex start{0}; // FIXME
+    auto e = find_unused(impl_->g_);
+    std::cerr << "Picked unused path " << e << std::endl;
+    node_t start = boost::source(e, impl_->g_), target = boost::target(e, impl_->g_);
+
     polygon result(impl_->n_, start);
-    visitor vis(5, result);
+    visitor vis(target, result);
     try {
         boost::breadth_first_search( impl_->g_, start, boost::visitor(vis) );
     }

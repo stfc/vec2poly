@@ -109,6 +109,9 @@ public:
     /** Iterator over all line segments */
     auto segments() { return std::ranges::views::join(map_); }
 
+    /** Iterate over all paths */
+    auto paths() { return std::ranges::views::all(map_); }
+
     /** All branch points
      * Throws BadWorld if an isolated point is found */
     [[nodiscard]] auto branch_points()

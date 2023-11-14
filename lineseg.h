@@ -5,7 +5,6 @@
 #ifndef VEC2POLY_LINESEG_H
 #define VEC2POLY_LINESEG_H
 
-#include <exception>
 #include <optional>
 #include <list>
 #include <set>
@@ -15,21 +14,20 @@
 #include <functional>
 #include "point.h"
 #include "pntalloc.h"
+#include "except.h"
 
-class BadLineSegment : public std::exception {
-    char const *const msg_;
+
+class BadLineSegment : public Vec2PolyException {
 public:
-    BadLineSegment() : msg_("Bad Line Segment") {};
-    BadLineSegment(char const *msg) : msg_(msg) {}
-    char const *what() const noexcept override { return msg_; }
+    BadLineSegment() : Vec2PolyException("Bad Line Segment") {};
+    BadLineSegment(char const *msg) : Vec2PolyException(msg) {}
 };
-class BadPath : public std::exception {
-    char const *const msg_;
+class BadPath : public Vec2PolyException {
 public:
-    BadPath() : msg_("Bad Path") {};
-    BadPath(char const *msg) : msg_(msg) {}
-    char const *what() const noexcept override { return msg_; }
+    BadPath() : Vec2PolyException("Bad Path") {};
+    BadPath(char const *msg) : Vec2PolyException(msg) {}
 };
+
 
 class lineseg {
 private:

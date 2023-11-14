@@ -398,6 +398,16 @@ bool test_make_poly2()
 {
     world w{make_world(4)};
     graph g(w);
+    try {
+        auto poly = g.find_polygon();
+        for( auto x : poly )
+            std::cerr << x << '\n';
+    }
+    catch( BadGraph const &e )
+    {
+        std::cerr << "No path found or other graph exception: " << e.what() << std::endl;
+        return false;
+    }
     return true;
 }
 

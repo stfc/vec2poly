@@ -26,5 +26,7 @@ add_executable(vec2poly main.cpp
         pntalloc.h
         graph-path.cpp
         graph-path.h
+        except.cpp
+        except.h
 )
 
