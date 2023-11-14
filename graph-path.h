@@ -24,14 +24,27 @@ public:
 class polygon {
     /** The ith index is j if node i is first reached from j */
     std::vector<node_t> come_from_;
-    /** Look up edge number from vertex number */
+    /** Look up edge number from vertex number
+     * The index is the node number of the destination node
+     */
     std::vector<edge_t> edges_;
     /** Start and end node of this polygon */
     node_t start_;
-    /** Invalid node number */
+    /** Invalid node number
+     * This is used for uninitialised nodes (as opposed to using -1, say, which is not a valid node_t)
+     */
     node_t invalid_;
+
 public:
+    /** Create a polygon of N vertices
+     * @param N number of vertices or equivalently number of edges
+     * @param start node number of start vertex
+     */
     polygon(std::size_t N, node_t start) : come_from_(N, N), edges_(N, N), start_(start), invalid_(N) {}
+
+    /** Add a new edge to dst from src with edge number e
+     * If dst already has an edge to it, do nothing, as the first one is best
+     */
     void add_edge(node_t src, node_t dst, edge_t e)
     {
         if(come_from_[dst] == invalid_) {

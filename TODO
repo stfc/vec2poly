@@ -7,3 +7,4 @@
 * Error messages should be a bit more informative - like where in the data the error was found
 * When stepping the world iterator over all line segments, inside a path the next segment will always meet the previous in their single shared point.
   Thus, for the purposes of finding unknown intersections between segments, one can always skip the next one unless it belongs to another path.
+* Create large example with 10**6 polygons or so, for performance testing and profiling
