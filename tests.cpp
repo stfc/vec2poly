@@ -397,6 +397,7 @@ bool test_make_poly1()
 bool test_make_poly2()
 {
     world w{make_world(4)};
+    w.proper_paths();
     graph g(w);
     try {
         auto poly = g.find_polygon();

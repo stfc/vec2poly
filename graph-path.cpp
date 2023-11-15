@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <boost/utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -80,9 +81,6 @@ static auto find_unused(Graph &g)
 
 graph::graph(world &w) : impl_(make_graphimpl(w))
 {
-    // DEBUG
-    for( auto [pp,val] : impl_->vertex_ )
-	std::cerr << "DEBUG " << pp << " - " << val <<  std::endl;
     /* At this point in construction, the graph has been set up but has no edges
      * Now add the edges - which will also create the vertices - in the graph
      */
@@ -115,8 +113,10 @@ node_t graph::vertex(pathpoint p)
 {
     auto q = impl_->vertex_.find(p);
     if(q == impl_->vertex_.end()) {
-	std::string msg("Unknown vertex ");
-        throw BadGraph(msg);
+	std::ostringstream msg;
+	msg << "Unknown vertex (did you \"properise\" the paths?): ";
+	msg << p;
+        throw BadGraph(msg.str());
     }
     return q->second;
 }
