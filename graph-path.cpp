@@ -188,13 +188,17 @@ polygon graph::find_polygon()
 
 std::ostream &operator<<(std::ostream &os, graph const &g)
 {
+    // Invert the map of points
+    std::vector<pathpoint> pts(g.impl_->n_);
+    for( auto [k,v] : g.impl_->vertex_ )
+        pts[v] = k;
     using iter = boost::graph_traits<decltype(g.impl_->g_)>::edge_iterator;
     auto [cur,end] = boost::edges(g.impl_->g_);
     while(cur != end) {
-	auto s = boost::source(*cur, g.impl_->g_);
-	auto t = boost::target(*cur, g.impl_->g_);
-	os << s << ' ' << t << '\n';
-	++cur;
+        auto s = boost::source(*cur, g.impl_->g_);
+        auto t = boost::target(*cur, g.impl_->g_);
+        os << '{' << s << '}' << pts[s] << ' ' << '{' << t << '}' << pts[t] << '\n';
+        ++cur;
     }
     return os;
 }
