@@ -113,9 +113,9 @@ node_t graph::vertex(pathpoint p)
 {
     auto q = impl_->vertex_.find(p);
     if(q == impl_->vertex_.end()) {
-	std::ostringstream msg;
-	msg << "Unknown vertex (did you \"properise\" the paths?): ";
-	msg << p;
+        std::ostringstream msg;
+        msg << "Unknown vertex (did you \"properise\" the paths?): ";
+        msg << p;
         throw BadGraph(msg.str());
     }
     return q->second;
@@ -148,30 +148,53 @@ public:
 };
 
 
-
 polygon graph::find_polygon()
 {
     // find_unused throws an exception if no path is found
     auto e = find_unused(impl_->g_);
     std::cerr << "Picked unused path " << e << std::endl;
     node_t start = boost::source(e, impl_->g_), target = boost::target(e, impl_->g_);
+    EdgeProp prop = impl_->g_[e];
 
     polygon result(impl_->n_, start);
     // The current edge will form the first edge of the polygon
-    result.add_edge(start, target, impl_->g_[e].index);
+    result.add_edge(start, target, prop.index);
 
     // For the search we need to connect the target to the starting point
     // because we are making a return path around the unused edge
     visitor vis(start, result);
 
-    // XXX temporarily remove the current edge/path to find alternative path
+    // Temporarily remove the current graph edge (path) to find alternative path
+    // from target back to the starting point, thus forming a polygon with the
+    // removed path
+    boost::remove_edge(e, impl_->g_);
+    std::cerr << *this;
     try {
         boost::breadth_first_search( impl_->g_, start, boost::visitor(vis) );
     }
     catch(visitor::found) {
+        // Restore the removed edge
+        boost::add_edge(start, target, prop, impl_->g_);
+        // The visitor has completed the polygon
         return result;
     }
 
+    // Restore the removed edge
+    boost::add_edge(start, target, prop, impl_->g_);
     throw BadGraph("no polygon found");
 
+}
+
+
+std::ostream &operator<<(std::ostream &os, graph const &g)
+{
+    using iter = boost::graph_traits<decltype(g.impl_->g_)>::edge_iterator;
+    auto [cur,end] = boost::edges(g.impl_->g_);
+    while(cur != end) {
+	auto s = boost::source(*cur, g.impl_->g_);
+	auto t = boost::target(*cur, g.impl_->g_);
+	os << s << ' ' << t << '\n';
+	++cur;
+    }
+    return os;
 }

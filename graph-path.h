@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <ranges>
+#include <iosfwd>
 #include "lineseg.h"
 #include "except.h"
 
@@ -127,6 +128,8 @@ public:
     void add_path(path const &, edge_t);
 
     polygon find_polygon();
+
+    friend std::ostream &operator<<(std::ostream &, graph const &);
 };
 
 #endif //VEC2POLY_GRAPH_PATH_H
