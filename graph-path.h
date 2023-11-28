@@ -131,6 +131,11 @@ public:
 
     void add_path(path const &, edge_t);
 
+    /** Find a polygon based on an unused path.
+     * @returns polygon object
+     * @returns Throws AllDone when no further polygons found 
+     * @returns Throws BadGraph when a path cannot be used in a polygon
+     */
     polygon find_polygon();
 
     friend std::ostream &operator<<(std::ostream &, graph const &);

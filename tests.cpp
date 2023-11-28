@@ -302,7 +302,7 @@ bool test_branch_points()
 }
 
 
-bool test_path_split1(std::vector<point> const &at, std::initializer_list<std::initializer_list<point>> y)
+static bool test_path_split1(std::vector<point> const &at, std::initializer_list<std::initializer_list<point>> y)
 {
     world w{make_world(1)};
     pntalloc &u = test_allocator(w);
@@ -401,8 +401,12 @@ bool test_make_poly2()
     graph g(w);
     try {
         auto poly = g.find_polygon();
-        for( auto x : poly )
+	auto m{0};
+        for( auto x : poly ) {
             std::cerr << x << '\n';
+	    ++m;
+	}
+	std::cerr << m << " paths found\n";
     }
     catch( graph::AllDone )
     {
