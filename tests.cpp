@@ -66,7 +66,7 @@ int tests()
         try {
             bool result = testfunc();
             if(!result) {
-                std::cerr << "Test " << num << " failed with no exception raised\n";
+                std::cerr << "Test " << num << " failed with no uncaught exception raised\n";
                 return 1;
             }
         }
