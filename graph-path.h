@@ -24,7 +24,8 @@ struct BadGraph : public Vec2PolyException
 
 
 class polygon {
-    /** The ith index is j if node i is first reached from j */
+    /** The ith index is j if node i is first reached from j.
+     * (The equivalent of the predecessor array in Dijkstra shortest path) */
     std::vector<node_t> come_from_;
     /** Look up edge number from vertex number
      * The index is the node number of the destination node
@@ -38,18 +39,20 @@ class polygon {
     node_t invalid_;
 
 public:
-    /** Create a polygon of N vertices
+    /** Create a polygon of N vertices.
      * @param N number of vertices or equivalently number of edges
      * @param start node number of start vertex
      */
     polygon(std::size_t N, node_t start) : come_from_(N, N), edges_(N, N), start_(start), invalid_(N) {}
 
-    /** Add a new edge to dst from src with edge number e
+    /** Add a new edge to dst from src with edge number e.
      * If dst already has an edge to it, do nothing, as the first one is best
+     * - unless we're returning to the beginning!
      */
     void add_edge(node_t src, node_t dst, edge_t e)
     {
         if(come_from_[dst] == invalid_) {
+        if(come_from_[dst] == invalid_ || dst == start_) {
             come_from_[dst] = src;
             edges_[dst] = e;
         }
@@ -87,6 +90,7 @@ public:
     /** End iterator */
     [[nodiscard]] poly_iterator end() const { return {this, invalid_}; }
 
+    friend std::ostream &operator<<(std::ostream &, polygon const &);
 };
 
 

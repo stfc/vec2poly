@@ -170,7 +170,7 @@ polygon graph::find_polygon()
     boost::remove_edge(e, impl_->g_);
     std::cerr << *this;
     try {
-        boost::breadth_first_search( impl_->g_, start, boost::visitor(vis) );
+        boost::breadth_first_search( impl_->g_, target, boost::visitor(vis) );
     }
     catch(visitor::found) {
         // Restore the removed edge
@@ -199,6 +199,20 @@ std::ostream &operator<<(std::ostream &os, graph const &g)
         auto t = boost::target(*cur, g.impl_->g_);
         os << '{' << s << '}' << pts[s] << ' ' << '{' << t << '}' << pts[t] << '\n';
         ++cur;
+    }
+    return os;
+}
+
+
+std::ostream &operator<<(std::ostream &os, const polygon &p)
+{
+    auto const end{p.come_from_.size()};
+    for(size_t i = 0; i < end; ++i) {
+        if(p.come_from_[i] == p.invalid_)
+            os << '*';
+        else
+            os << p.come_from_[i];
+        os << " -> " << i << '\n';
     }
     return os;
 }
