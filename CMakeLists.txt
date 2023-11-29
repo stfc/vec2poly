@@ -28,5 +28,7 @@ add_executable(vec2poly main.cpp
         graph-path.h
         except.cpp
         except.h
+        polygon.cpp
+        polygon.h
 )
 
