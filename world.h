@@ -112,6 +112,9 @@ public:
     /** Iterate over all paths */
     auto paths() { return std::ranges::views::all(map_); }
 
+    /** Provide read-only access to the paths container */
+    decltype(map_) const &map() const noexcept { return map_; }
+
     /** All branch points
      * Throws BadWorld if an isolated point is found */
     [[nodiscard]] auto branch_points()

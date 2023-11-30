@@ -7,6 +7,8 @@
 
 #include <iosfwd>
 
+// world is defined in world.h
+class world;
 
 typedef unsigned long node_t;
 typedef unsigned long edge_t;
@@ -77,6 +79,13 @@ public:
     [[nodiscard]] poly_iterator begin() const { return {this}; }
     /** End iterator */
     [[nodiscard]] poly_iterator end() const { return {this, invalid_}; }
+
+    /** Check polygon is OK (starts at the start, ends at the start).
+     * It assumes all paths are proper. */
+    bool is_valid(world const &) const noexcept;
+
+    /** Use all world paths to tidy a polygon */
+    void tidy(world const &);
 
     friend std::ostream &operator<<(std::ostream &, polygon const &);
 };

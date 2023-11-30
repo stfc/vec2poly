@@ -35,7 +35,11 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 [[nodiscard]] static bool test_path_split();
 /** Testing the polygon edge iterator */
 [[nodiscard]] static bool test_make_poly1();
+/** Test finding a polygon in the world */
 [[nodiscard]] static bool test_make_poly2();
+/** Test cleaning a polygon */
+[[nodiscard]] static bool test_tidy_poly();
+
 
 static world make_world(int);
 
@@ -58,9 +62,9 @@ int tests()
     bool ret = true;
     unsigned num{0};
     // Tests are to be run in this order
-    std::array<std::function<bool()>,10> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
+    std::array<std::function<bool()>,11> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
                                             test_poly2, test_path_iter, test_branch_points, test_path_split,
-                                            test_make_poly1, test_make_poly2 };
+                                            test_make_poly1, test_make_poly2, test_tidy_poly };
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -401,12 +405,10 @@ bool test_make_poly2()
     graph g(w);
     try {
         auto poly = g.find_polygon();
-        auto m{0};
-        for( auto x : poly ) {
-            std::cerr << x << '\n';
-	    ++m;
+        if(!poly.is_valid(w)) {
+            std::cerr << "poly2: find poly invalid polygon\n";
+            return false;
         }
-        std::cerr << m << " paths found\n";
     }
     catch( graph::AllDone )
     {
@@ -418,6 +420,18 @@ bool test_make_poly2()
         std::cerr << "poly2: no path found or other graph exception: " << e.what() << std::endl;
         return false;
     }
+    return true;
+}
+
+
+bool test_tidy_poly()
+{
+    world w{make_world(4)};
+    w.proper_paths();
+    graph g(w);
+    // See description of node indices in doc for make_world
+    // Four points, start at 0
+    polygon poly(4,0);
     return true;
 }
 
@@ -440,14 +454,15 @@ bool test_make_poly2()
  * 4. ch
  *
  * Once converted to a graph, it looks like
- *
- *   0 ----- 3
- *  / \     / \
- *  | |     | |
- *  \ /     \ /
- *   1 ----- 2
- *
- * where 0 is c=(-1,0); 1 is d=(-2,1); 2 is g=(1,1); 3 is h=(0,0)
+ *         3
+ *    0 -------> 3
+ *   / \        / \
+ * 5 V ^ 0    2 V ^ 4
+ *   \ /        \ /
+ *    1 -------> 2
+ *         1
+ * where node 0 is c=(-1,0); 1 is d=(-2,1); 2 is g=(1,1); 3 is h=(0,0)
+ * and the edge numbers denote the initial order assigned by the graph object
  */
 
 world make_world(int k)
