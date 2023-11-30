@@ -401,12 +401,12 @@ bool test_make_poly2()
     graph g(w);
     try {
         auto poly = g.find_polygon();
-	auto m{0};
+        auto m{0};
         for( auto x : poly ) {
             std::cerr << x << '\n';
 	    ++m;
-	}
-	std::cerr << m << " paths found\n";
+        }
+        std::cerr << m << " paths found\n";
     }
     catch( graph::AllDone )
     {
@@ -415,7 +415,7 @@ bool test_make_poly2()
     }
     catch( BadGraph const &e )
     {
-        std::cerr << "No path found or other graph exception: " << e.what() << std::endl;
+        std::cerr << "poly2: no path found or other graph exception: " << e.what() << std::endl;
         return false;
     }
     return true;
@@ -438,6 +438,16 @@ bool test_make_poly2()
  * 3a. hg
  * 3b. gih
  * 4. ch
+ *
+ * Once converted to a graph, it looks like
+ *
+ *   0 ----- 3
+ *  / \     / \
+ *  | |     | |
+ *  \ /     \ /
+ *   1 ----- 2
+ *
+ * where 0 is c=(-1,0); 1 is d=(-2,1); 2 is g=(1,1); 3 is h=(0,0)
  */
 
 world make_world(int k)

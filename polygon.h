@@ -49,15 +49,15 @@ public:
     /** Iterator over the paths (indices) that make up the polygon */
     class poly_iterator {
         polygon const *poly_;
-        node_t cur_;
+        node_t init_, cur_;
     public:
-        poly_iterator(polygon const *p) : poly_(p), cur_(p->start_) {}
-        poly_iterator(polygon const *p, node_t init) : poly_(p), cur_(init) {}
+        poly_iterator(polygon const *p) : poly_(p), init_(p->start_), cur_(p->start_) {}
+        poly_iterator(polygon const *p, node_t init) : poly_(p), init_(init), cur_(init) {}
         edge_t operator*() const { return poly_->edges_[cur_]; }
         poly_iterator &operator++()
         {
             cur_ = poly_->come_from_[cur_];
-            if(cur_ == poly_->start_)
+            if(cur_ == init_)
                 cur_ = poly_->invalid_;
             return *this;
         }

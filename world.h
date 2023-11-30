@@ -36,7 +36,9 @@ private:
     /* Point factory */
     pntalloc alloc_;
 
-    /* This iterator works like ranges::views::join, but we need both iterators
+    /** Iterator over all line segments in all paths in the world.
+     *
+     * This iterator works like ranges::views::join, but we need both iterators
      * so we can insert stuff at the list iterator position (which does not
      * invalidate the iterator).
      * Otherwise, this approach is not recommended; much too fiddly.
@@ -83,9 +85,7 @@ private:
     iterator end() { return iterator(map_, false); }
 
 public:
-    /* We must prevent the world from being copied
-     * as it would currently invalidate the shared pointer counter
-     * which is used to track incidence to every point. */
+
     world() = default;
     world(world const &) = delete;
     world(world &&) = default;
