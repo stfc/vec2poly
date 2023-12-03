@@ -6,6 +6,7 @@
 #define VEC2POLY_POLYGON_H
 
 #include <iosfwd>
+#include "point.h"
 
 // world is defined in world.h
 class world;
@@ -69,7 +70,7 @@ public:
             ++(*this);
             return i;
         }
-        bool operator==(poly_iterator const &o)
+        bool operator==(poly_iterator const &o) const
         {
             return cur_ == o.cur_;
         }
@@ -86,6 +87,9 @@ public:
 
     /** Use all world paths to tidy a polygon */
     void tidy(world const &);
+
+    /** Is a point interior to the polygon? */
+    bool interior(world &, point) const;
 
     friend std::ostream &operator<<(std::ostream &, polygon const &);
 };

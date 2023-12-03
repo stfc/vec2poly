@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <vector>
+#include <numeric>
 #include "polygon.h"
 #include "world.h"
 
@@ -11,7 +12,7 @@
 bool polygon::is_valid(const world &w) const noexcept
 {
     // We need the world map to map edge numbers to paths and real-world locations
-    auto &worldmap{w.map()};
+    auto const &worldmap{w.map()};
 
     // A single-point polygon is not allowed
     if(edges_.empty())
@@ -22,7 +23,6 @@ bool polygon::is_valid(const world &w) const noexcept
     while (e != m) {
         // Endpoint of the current path
         auto p = worldmap[*e].endpoints().second;
-        // If a point is re-visited and it's not back-to-the-start, then something's wrong
         visited.push_back(p);
         ++e;
     }
@@ -31,10 +31,9 @@ bool polygon::is_valid(const world &w) const noexcept
         return false;
     // Check non-intersection other than at start/end - could probably be optimised
     visited.pop_back();
-    std::sort(visited.begin(), visited.end());
-    auto len = visited.size();
-    std::unique(visited.begin(), visited.end());
-    if(visited.size() != len)
+    auto all = visited.end();
+    std::sort(visited.begin(), all);
+    if(std::unique(visited.begin(), visited.end()) != all)
         return false;
     return true;
 }
@@ -45,7 +44,7 @@ bool polygon::is_valid(const world &w) const noexcept
  * This function is the last major algorithmic component: loop through
  * all paths not already on the polygon, if any is interior to the current
  * polygon then replace a piece of the polygon with this path, thus reducing
- * the number of internal paths by one - and repeat.
+ * the number of interior paths by one - and repeat.
  *
  * Thanks to making paths "proper," if a path has /any/ point interior to
  * the polygon, then the /entire path/ is inside the polygon.
@@ -57,8 +56,22 @@ void polygon::tidy(const world &w)
 {
     // We need the world map to map edge numbers to paths and real-world locations
     auto &worldmap{w.map()};
-
+    //while(!clean_path())
 }
+
+
+/** Determine whether a point is interior to the polygon.
+ * We may assume the test point never lies on a line segment
+ * @param p test point
+ * @return true if the test point is interior
+ *
+ * @cite https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
+ */
+bool polygon::interior(world &, point p) const
+{
+    //unsigned
+}
+
 
 std::ostream &operator<<(std::ostream &os, const polygon &p)
 {

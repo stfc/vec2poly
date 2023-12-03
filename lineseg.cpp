@@ -44,6 +44,31 @@ std::optional<point> intersects(lineseg const &v, lineseg const &w)
 }
 
 
+/** Helper function for polygon::interior().
+ * Check whether a ray to the right (X>0) from point intersects segment
+ *
+ * @param line linesegment we're trying to hit (see ref for interior())
+ * @param p test point
+ * @return number of half-intersections
+ */
+unsigned intersects(lineseg const &line, const point p)
+{
+    point a{static_cast<point>(*line.first())},
+            b{static_cast<point>(*line.second())};
+    if(between(a.y(), p.y(), b.y())) {
+        double t = (p.y()-a.y())/(b.y()-a.y());
+        double x1 = std::lerp(a.x(), b.x(), t);
+        return between(a.x(), x1, b.x()) ? 2 : 0;
+    }
+    unsigned k = 0;
+    if(p.y() == a.y() && p.x() < a.x())
+        ++k;
+    if(p.y() == b.y() && p.x() < b.x())
+        ++k;
+    return k;
+}
+
+
 std::ostream &operator<<(std::ostream &os, lineseg const &line)
 {
     os << '[' << line.a_ << ',' << line.b_ << ']';

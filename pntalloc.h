@@ -46,6 +46,7 @@ public:
     friend bool test_pntalloc();
     friend bool test_lineseg();
     friend bool test_split_seg();
+    friend bool test_interior1();
 };
 
 

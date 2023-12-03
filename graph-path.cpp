@@ -173,7 +173,8 @@ polygon graph::find_polygon()
         boost::breadth_first_search( impl_->g_, target, boost::visitor(vis) );
     }
     catch(visitor::found) {
-        // Restore the removed edge
+        // Restore the removed edge.  Note it will likely be restored to
+        // a different location in boost's internal edge storage
         boost::add_edge(start, target, prop, impl_->g_);
         // The visitor has completed the polygon
         return result;

@@ -37,6 +37,8 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 [[nodiscard]] static bool test_make_poly1();
 /** Test finding a polygon in the world */
 [[nodiscard]] static bool test_make_poly2();
+/** Test interor points algorithm */
+[[nodiscard]] static bool test_interior();
 /** Test cleaning a polygon */
 [[nodiscard]] static bool test_tidy_poly();
 
@@ -62,9 +64,9 @@ int tests()
     bool ret = true;
     unsigned num{0};
     // Tests are to be run in this order
-    std::array<std::function<bool()>,11> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
+    std::array<std::function<bool()>,12> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
                                             test_poly2, test_path_iter, test_branch_points, test_path_split,
-                                            test_make_poly1, test_make_poly2, test_tidy_poly };
+                                            test_make_poly1, test_make_poly2, test_interior, test_tidy_poly };
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -421,6 +423,48 @@ bool test_make_poly2()
         return false;
     }
     return true;
+}
+
+
+/* Helper function for test_interior testing the helper function for interior... */
+bool test_interior1()
+{
+    pntalloc p;
+    lineseg w{p,{-1,2},{1,-2}};
+    std::vector<unsigned> expect{0,1,2,2,0,1,0};;
+    for(int x=-4, y=-3; y <= 3; ++x, ++y) {
+        point p{static_cast<double>(x),static_cast<double>(y)};
+        auto u = intersects(w, p);
+        if(expect.empty()) {
+            std::cerr << "test_int1 ran out of test values?\n";
+            return false;
+        }
+        std::cerr << p << ' ' << expect.front() << ' ' << u << '\n';
+        if(u != expect.front()) {
+            std::cerr << "test_int1 point " << p << " expected " << expect.front()
+                      << " got " << u << '\n';
+            return false;
+        }
+        expect.erase(expect.begin());
+    }
+    if(!expect.empty()) {
+        std::cerr << "test_int1 not all test cases covered\n";
+        return false;
+    }
+    return true;
+}
+
+
+/* Helper function for test_interior testing polynomial */
+static bool test_interior2()
+{
+    return false;
+}
+
+
+bool test_interior()
+{
+    return test_interior1() && test_interior2();
 }
 
 

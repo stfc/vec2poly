@@ -12,6 +12,24 @@
 #include <vector>
 
 
+/** Check between-ness (doesn't seem to be in std?).
+ *
+ * @tparam NUM Comparable numeric type
+ * @param a lower or upper bound
+ * @param x thing-to-test for betweenness
+ * @param b upper or lower bound
+ * @return true if strictly between
+ * Does not support types whose comparison is not noexcept
+ */
+
+template<typename NUM>
+requires std::totally_ordered<NUM>
+static inline bool between(NUM a, NUM x, NUM b) noexcept
+{
+    return a < x && x < b || b < x && x < a;
+}
+
+
 class pntalloc;
 
 

@@ -27,7 +27,7 @@ struct graphimpl;
  *
  * In the world class, vertices are branch points and edges are proper paths.
  * Branch points are of type pathpoint; edges are paths represented by integer
- * indices into world's internal array.
+ * indices into world's interior array.
  * In the boost view, all are unsigned ints.
  *
  * The main job of the class is to find candidate polygons.  This is done by:

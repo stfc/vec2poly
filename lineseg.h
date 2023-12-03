@@ -99,6 +99,14 @@ public:
 };
 
 
+/** Check whether a ray going right from the test point intersects a line segment.
+ *
+ * @return Number of half intersections
+ */
+
+unsigned intersects(lineseg const &, const point);
+
+
 class world;
 
 /** A path is a sequence of line segments where each segment begins where the previous finished
