@@ -23,8 +23,14 @@
  */
 
 template<typename NUM>
-requires std::totally_ordered<NUM>
-static inline bool between(NUM a, NUM x, NUM b) noexcept
+concept noexcept_compare = requires(NUM a, NUM b)
+{
+    noexcept(a < b);
+};
+
+template<typename NUM>
+requires std::totally_ordered<NUM> && noexcept_compare<NUM>
+inline bool between(NUM a, NUM x, NUM b) noexcept
 {
     return a < x && x < b || b < x && x < a;
 }
