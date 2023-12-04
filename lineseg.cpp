@@ -56,9 +56,11 @@ unsigned intersects(lineseg const &line, const point p)
     point a{static_cast<point>(*line.first())},
             b{static_cast<point>(*line.second())};
     if(between(a.y(), p.y(), b.y())) {
-        double t = (p.y()-a.y())/(b.y()-a.y());
+        double t = (p.y()-static_cast<double>(a.y()))/(b.y()-a.y());
+	// x coord of intersection with line segment
         double x1 = std::lerp(a.x(), b.x(), t);
-        return between(a.x(), x1, b.x()) ? 2 : 0;
+	// Intersection must be (strictly) to the right
+        return x1 > p.x() ? 2 : 0;
     }
     unsigned k = 0;
     if(p.y() == a.y() && p.x() < a.x())
