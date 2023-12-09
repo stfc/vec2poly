@@ -457,6 +457,19 @@ bool test_interior1()
 /* Helper function for test_interior testing polynomial */
 static bool test_interior2()
 {
+    world w{make_world(4)};
+    w.proper_paths();
+    // Graph values refer to those documented in the comment for make_world
+    polygon p(4, 0);
+    p.add_edge(0, 3, 3);
+    p.add_edge(3, 2, 2);
+    p.add_edge(2, 1, 1);
+    p.add_edge(1, 0, 5);
+    if(p.is_valid(w))
+	std::cerr << "Polygon is valid\n";
+    else
+	std::cerr << "Polygon is invalid\n";
+    p.linesegs(w);
     return true;
 }
 
@@ -505,7 +518,8 @@ bool test_tidy_poly()
  *    1 -------> 2
  *         1
  * where node 0 is c=(-1,0); 1 is d=(-2,1); 2 is g=(1,1); 3 is h=(0,0)
- * and the edge numbers denote the initial order assigned by the graph object
+ * and the edge numbers denote the initial order assigned by the graph object.
+ * Note that edges are undirected, though they are saved as if they were directed as above.
  */
 
 world make_world(int k)

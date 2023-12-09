@@ -23,6 +23,11 @@ public:
     char const *what() const noexcept override { return msg_; }
 };
 
+
+// defined in polygon.cpp
+class path_lookup;
+
+
 /** World - the home of all paths
  *
  * The world is not really an object, it is the entire program...
@@ -137,6 +142,9 @@ public:
     pathpoint make_point(double x, double y) { return alloc_.make_point(x, y); }
 
     friend std::ostream &operator<<(std::ostream &, world const &);
+
+    // defined in polygon.cpp
+    friend class path_lookup;
 
     // regression testing functions break encapsulation
     friend pntalloc &test_allocator(world &);

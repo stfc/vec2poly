@@ -168,7 +168,6 @@ polygon graph::find_polygon()
     // from target back to the starting point, thus forming a polygon with the
     // removed path
     boost::remove_edge(e, impl_->g_);
-    std::cerr << *this;
     try {
         boost::breadth_first_search( impl_->g_, target, boost::visitor(vis) );
     }

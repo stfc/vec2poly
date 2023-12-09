@@ -85,6 +85,9 @@ public:
      * It assumes all paths are proper. */
     bool is_valid(world const &) const noexcept;
 
+    /** Line segments in (currently) arbitrary order */
+    void linesegs(world const &);
+
     /** Use all world paths to tidy a polygon */
     void tidy(world const &);
 

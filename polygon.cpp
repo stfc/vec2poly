@@ -19,6 +19,8 @@ bool polygon::is_valid(const world &w) const noexcept
         return false;
     std::vector<pathpoint> visited;
     auto e = begin(), m = end();
+//    point current{start_};
+
     visited.push_back(worldmap[*e].endpoints().first);
     while (e != m) {
         // Endpoint of the current path
@@ -36,6 +38,26 @@ bool polygon::is_valid(const world &w) const noexcept
     if(std::unique(visited.begin(), visited.end()) != all)
         return false;
     return true;
+}
+
+
+/** Adaptor object to convert a edge number (edge_t) to an actual path */
+class path_lookup final {
+    world const &w_;
+public:
+    path_lookup(world const &w): w_(w) {}
+    path const &operator()(edge_t e) { return w_.map_[e]; }
+};
+
+
+void polygon::linesegs(world const &w)
+{
+    path_lookup lookup(w);
+    for( auto &s :
+        edges_ 
+        | std::views::transform(lookup)
+        | std::views::join )
+        std::cerr << s << '\n';
 }
 
 

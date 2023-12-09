@@ -145,6 +145,8 @@ public:
 
     auto begin() const noexcept { return path_.begin(); }
     auto end() const noexcept { return path_.end(); }
+    auto rbegin() const noexcept { return path_.rbegin(); }
+    auto rend() const noexcept { return path_.rend(); }
 
     /* This breaks encapsulation but can be Fixed Later(tm) */
     friend class world;
