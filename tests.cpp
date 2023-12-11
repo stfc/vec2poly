@@ -461,9 +461,13 @@ static bool test_interior2()
     w.proper_paths();
     // Graph values refer to those documented in the comment for make_world
     polygon p(4, 0);
+    // Add edge 3: c->h or (-1,0) -> (0,0)
     p.add_edge(0, 3, 3);
+    // Add edge 2: h->i->g or (0,0) -> (1,0) -> (1,1)
     p.add_edge(3, 2, 2);
+    // Add edge 1: d->e->f->g or (-2,1) -> (-1,2) -> (0,2) -> (1,1)
     p.add_edge(2, 1, 1);
+    // Add edge 5: c->d or (-1,0) -> (-2,1)
     p.add_edge(1, 0, 5);
     if(p.is_valid(w))
 	std::cerr << "Polygon is valid\n";
@@ -520,6 +524,15 @@ bool test_tidy_poly()
  * where node 0 is c=(-1,0); 1 is d=(-2,1); 2 is g=(1,1); 3 is h=(0,0)
  * and the edge numbers denote the initial order assigned by the graph object.
  * Note that edges are undirected, though they are saved as if they were directed as above.
+ *
+ * After the "proper paths" call is run, the paths between branch points (in the current
+ * implementation) will be:
+ * Path 0: dabc or 1->0
+ * Path 1: defg or 1->2
+ * Path 2: hig or 3->2
+ * Path 3: ch or 0->3
+ * Path 4: gh or 2->3
+ * Path 5: cd or 0->1
  */
 
 world make_world(int k)

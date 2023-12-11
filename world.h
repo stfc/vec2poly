@@ -126,8 +126,6 @@ public:
     {
         auto filter = [](pathpoint x) -> bool
         {
-            // use_count is normally incidence plus one; here x is another copy
-            // so incidence is use count minus two
             auto i = x->use_count();
             if(i == 1)
                 throw BadWorld("Unconnected line segment found");
