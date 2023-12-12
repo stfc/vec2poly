@@ -103,7 +103,7 @@ void graph::add_path(const path &p, edge_t i)
     Vertex src = vertex(endpoints.first), dst = vertex(endpoints.second);
     EdgeProp data{i, false};
     auto flops = boost::add_edge(src, dst, data, impl_->g_);
-    // Failure happens if the edge already exists
+    // Failure happens if the edge already exists?
     if(!flops.second)
         throw BadGraph("failed to add edge");
 }
