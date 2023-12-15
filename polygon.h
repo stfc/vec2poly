@@ -27,6 +27,22 @@ typedef unsigned long node_t;
 typedef unsigned long edge_t;
 
 
+/** Polygon diagnostics returned by is_valid */
+enum class poly_errno_t {
+    /** Polygon is good */
+    POLY_GOOD,
+    /** Polygon is good but last point of last path is not the same as first point of first path */
+    POLY_NOTCLOSED,
+    /** Polygon has a path disconnected from its neighbour */
+    POLY_BROKENPATH,
+    /** Polygon is a single point (no paths) */
+    POLY_EMPTY,
+    /** Polygon intersects itself somewhere a la figure 8 */
+    POLY_SELFINTERSECT
+};
+
+char const *poly_errno_string(poly_errno_t);
+
 class polygon {
     /** The ith index is j if node i is first reached from j.
      * (The equivalent of the predecessor array in Dijkstra shortest path) */
@@ -95,7 +111,7 @@ public:
 
     /** Check polygon is OK (starts at the start, ends at the start).
      * It assumes all paths are proper. */
-    bool is_valid(world const &) const noexcept;
+    poly_errno_t is_valid(const world &) const noexcept;
 
     /** Line segments in (currently) arbitrary order */
     void linesegs(world const &);

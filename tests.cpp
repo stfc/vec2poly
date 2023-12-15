@@ -12,6 +12,7 @@
 #include "world.h"
 #include "pntalloc.h"
 #include "graph-path.h"
+#include "polygon.h"
 
 bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<point>);
 
@@ -407,8 +408,9 @@ bool test_make_poly2()
     graph g(w);
     try {
         auto poly = g.find_polygon();
-        if(!poly.is_valid(w)) {
-            std::cerr << "poly2: find poly invalid polygon\n";
+        auto statws = poly.is_valid(w);
+        if(statws != poly_errno_t::POLY_GOOD) {
+            std::cerr << "poly2: find poly invalid polygon: " << poly_errno_string(statws) << std::endl;
             return false;
         }
     }
@@ -469,10 +471,11 @@ static bool test_interior2()
     p.add_edge(2, 1, 1);
     // Add edge 5: c->d or (-1,0) -> (-2,1)
     p.add_edge(1, 0, 5);
-    if(p.is_valid(w))
-	std::cerr << "Polygon is valid\n";
+    auto status = p.is_valid(w);
+    if(status == poly_errno_t::POLY_GOOD)
+        std::cerr << "Polygon is valid\n";
     else
-	std::cerr << "Polygon is invalid\n";
+        std::cerr << "int2 Polygon is invalid: " << poly_errno_string(status) << "\n";
     p.linesegs(w);
     return true;
 }

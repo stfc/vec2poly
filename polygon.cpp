@@ -9,37 +9,49 @@
 #include "world.h"
 
 
-bool polygon::is_valid(const world &w) const noexcept
+poly_errno_t polygon::is_valid(const world &w) const noexcept
 {
     // We need the world map to map edge numbers to paths and real-world locations
     auto const &worldmap{w.map()};
 
-    // A single-point polygon is not allowed
-    if(edges_.empty())
-        return false;
     std::vector<pathpoint> visited;
     // Remember the polygon iterator works backwards through paths, from start back to start
     auto e = begin(), m = end();
-    auto current{start_};
+    // A single-point polygon is not allowed
+    if(e == m)
+        return poly_errno_t::POLY_EMPTY;
+    // a and b are initialised to the endpoints of the first (last) edge
+    auto [a,b] = worldmap[*e++].endpoints();
 
-    // Each edge has a node_t start and endpoint and for each of these, a corresponding physical point (a branch point)
-    visited.push_back(worldmap[*e].endpoints().first);
     while (e != m) {
-        // Endpoint of the current path
-        auto p = worldmap[*e].endpoints().second;
-        visited.push_back(p);
+        auto p = worldmap[*e].endpoints();
+        // path may need to be reversed to fit the polygon
+        if (a == p.first) {
+            a = p.second;
+            visited.push_back(a);
+        } else if (a == p.second) {
+            a = p.first;
+            visited.push_back(a);
+        } else if (b == p.first) {
+            b = p.second;
+            visited.push_back(b);
+        } else if (b == p.second) {
+            b = p.first;
+            visited.push_back(b);
+        } else
+            return poly_errno_t::POLY_BROKENPATH;
         ++e;
     }
     // Polygon not closed
-    if(visited.front() != visited.back())
-        return false;
+    if(a != b)
+        return poly_errno_t::POLY_NOTCLOSED;
     // Check non-intersection other than at start/end - could probably be optimised
     visited.pop_back();
     auto all = visited.end();
     std::sort(visited.begin(), all);
     if(std::unique(visited.begin(), visited.end()) != all)
-        return false;
-    return true;
+        return poly_errno_t::POLY_SELFINTERSECT;
+    return poly_errno_t::POLY_GOOD;
 }
 
 
@@ -108,4 +120,21 @@ std::ostream &operator<<(std::ostream &os, const polygon &p)
         os << " -> " << i << '\n';
     }
     return os;
+}
+
+
+char const *poly_errno_string(poly_errno_t err) {
+    switch(err) {
+        case poly_errno_t::POLY_GOOD:
+            return "OK";
+        case poly_errno_t::POLY_SELFINTERSECT:
+            return "self intersecting";
+        case poly_errno_t::POLY_NOTCLOSED:
+            return "not closed";
+        case poly_errno_t::POLY_BROKENPATH:
+            return "disconnected paths";
+        case poly_errno_t::POLY_EMPTY:
+            return "degenerate (single-point) polygon";
+    }
+    return "canthappen polygon error";
 }
