@@ -18,9 +18,11 @@ bool polygon::is_valid(const world &w) const noexcept
     if(edges_.empty())
         return false;
     std::vector<pathpoint> visited;
+    // Remember the polygon iterator works backwards through paths, from start back to start
     auto e = begin(), m = end();
-//    point current{start_};
+    auto current{start_};
 
+    // Each edge has a node_t start and endpoint and for each of these, a corresponding physical point (a branch point)
     visited.push_back(worldmap[*e].endpoints().first);
     while (e != m) {
         // Endpoint of the current path
