@@ -9,10 +9,19 @@
 #include "world.h"
 
 
+/** Adaptor object to convert a edge number (edge_t) to an actual path */
+class path_lookup final {
+    world const &w_;
+public:
+    path_lookup(world const &w): w_(w) {}
+    path const &operator()(edge_t e) const { return w_.map_[e]; }
+};
+
+
 poly_errno_t polygon::is_valid(const world &w) const noexcept
 {
     // We need the world map to map edge numbers to paths and real-world locations
-    auto const &worldmap{w.map()};
+    path_lookup const lookup(w);
 
     std::vector<pathpoint> visited;
     // Remember the polygon iterator works backwards through paths, from start back to start
@@ -21,10 +30,10 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
     if(e == m)
         return poly_errno_t::POLY_EMPTY;
     // a and b are initialised to the endpoints of the first (last) edge
-    auto [a,b] = worldmap[*e++].endpoints();
+    auto [a,b] = lookup(*e++).endpoints();
 
     while (e != m) {
-        auto p = worldmap[*e].endpoints();
+        auto p = lookup(*e).endpoints();
         // path may need to be reversed to fit the polygon
         if (a == p.first) {
             a = p.second;
@@ -53,15 +62,6 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
         return poly_errno_t::POLY_SELFINTERSECT;
     return poly_errno_t::POLY_GOOD;
 }
-
-
-/** Adaptor object to convert a edge number (edge_t) to an actual path */
-class path_lookup final {
-    world const &w_;
-public:
-    path_lookup(world const &w): w_(w) {}
-    path const &operator()(edge_t e) { return w_.map_[e]; }
-};
 
 
 void polygon::linesegs(world const &w)
