@@ -5,13 +5,14 @@
 #ifndef VEC2POLY_GRAPH_PATH_H
 #define VEC2POLY_GRAPH_PATH_H
 
-#include <vector>
+#include <set>
 #include <ranges>
 #include <iosfwd>
 #include "lineseg.h"
 #include "except.h"
 #include "polygon.h"
 
+using test_t = std::function<bool(node_t)>;
 
 struct BadGraph : public Vec2PolyException
 {
@@ -52,6 +53,7 @@ public:
     {
     };
 
+    using edgelist = std::set<edge_t>;
 
     /** Return the node number of a given world point */
     node_t vertex(pathpoint);
@@ -64,6 +66,15 @@ public:
      * @returns Throws BadGraph when a path cannot be used in a polygon
      */
     polygon find_polygon();
+
+    /** Find a path to a particular node or set of nodes
+     *
+     * @param start node index of start point
+     * @param goal called as each node is added to the subtree, returning bool if it's a target
+     * @param avoid edge numbers of paths to exclude
+     * @return list of edge numbers of edges in path
+     */
+    polygon pathfinder(node_t start, test_t goal, const graph::edgelist &avoid);
 
     friend std::ostream &operator<<(std::ostream &, graph const &);
 };

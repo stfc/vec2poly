@@ -103,7 +103,7 @@ void polygon::tidy(const world &w)
  *
  * @cite https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
  */
-bool polygon::interior(world &, point p) const
+bool polygon::interior(world &w, point p) const
 {
     //unsigned
 }

@@ -5,6 +5,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <map>
+#include <vector>
 #include "graph-path.h"
 #include "world.h"
 
@@ -22,7 +23,9 @@ struct EdgeProp
     explicit EdgeProp(edge_t i, bool u = false) : index(i), used(u) {}
 };
 
-using Graph = boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS, VertexProp, EdgeProp >;
+// (out)edge storage is the first customisation: we use a list so we can
+// add and remove edges without invalidating iterators
+using Graph = boost::adjacency_list< boost::listS, boost::vecS, boost::undirectedS, VertexProp, EdgeProp >;
 
 using Edge = std::pair<int, int>;
 
@@ -124,12 +127,11 @@ node_t graph::vertex(pathpoint p)
 
 class visitor : public boost::default_bfs_visitor
 {
-    Vertex tgt_;
     // This has to be a reference because boost will copy the visitor object and
     // update the copy
     polygon &p_;
 public:
-    visitor(Vertex target, polygon &p) : tgt_(target), p_(p) {}
+    visitor(test_t testfunc, polygon &p) : p_(p), test_(testfunc) {}
 
     class found {};
 
@@ -142,45 +144,87 @@ public:
         // insert if missing but do not overwrite existing entry
         p_.add_edge(src, dst, edge);
         /* Shortcut spanning subtree generation after we find the target */
-        if( boost::target(e, g) == tgt_ ) throw found();
+        if( test_(boost::target(e, g)) ) throw found();
     }
-
+private:
+    test_t test_;
 };
 
 
-polygon graph::find_polygon()
-{
+polygon graph::find_polygon() {
     // find_unused throws an exception if no path is found
     auto e = find_unused(impl_->g_);
     std::cerr << "Picked unused path " << e << std::endl;
     node_t start = boost::source(e, impl_->g_), target = boost::target(e, impl_->g_);
     EdgeProp prop = impl_->g_[e];
 
-    polygon result(impl_->n_, start);
-    // The current edge will form the first edge of the polygon
+    auto test = [start](Vertex v) { return v == start; };
+    edgelist avoid = {prop.index};
+    polygon result = pathfinder(target, test, avoid);
+    // The current edge will form the first/last edge of the polygon
     result.add_edge(start, target, prop.index);
+    return result;
+}
+
+
+struct EdgeData {
+    Vertex src, dst;
+    EdgeProp data;
+    using collect = std::vector<EdgeData>;
+};
+
+static auto save_edges(Graph &g, graph::edgelist const &edges)
+{
+    EdgeData::collect data;
+    data.reserve(edges.size());
+    // Check that iterators are not invalidated by remove_edge
+    auto [p, q] = boost::edges(g);
+    while(p != q) {
+        auto p1 = p;
+        ++p1;
+        if(edges.contains(g[*p].index)) {
+            Vertex src = boost::source(*p, g);
+            Vertex dst = boost::target(*p, g);
+            data.push_back({src, dst, g[*p]});
+            g.remove_edge(*p);
+        }
+        p = p1;
+    }
+    return data;
+}
+
+
+static auto restore_edges(Graph &g, EdgeData::collect const &data)
+{
+    std::ranges::for_each(data, [&g](EdgeData const &e) { boost::add_edge(e.src, e.dst, e.data, g); });
+}
+
+
+polygon graph::pathfinder(node_t start, test_t goal, const graph::edgelist &avoid)
+{
+    polygon result(impl_->n_, start);
+
+    // Temporarily remove the avoid graph edges (paths)
+    // (the alternatives would be to either copy the graph minus the
+    // to-be-avoided edges, or to weight the edges changing the weights
+    // to prohibit using the to-be-avoided edges)
+    auto saved = save_edges(impl_->g_, avoid);
 
     // For the search we need to connect the target to the starting point
     // because we are making a return path around the unused edge
-    visitor vis(start, result);
-
-    // Temporarily remove the current graph edge (path) to find alternative path
-    // from target back to the starting point, thus forming a polygon with the
-    // removed path
-    boost::remove_edge(e, impl_->g_);
+    visitor vis(goal, result);
     try {
-        boost::breadth_first_search( impl_->g_, target, boost::visitor(vis) );
+        boost::breadth_first_search( impl_->g_, start, boost::visitor(vis) );
     }
     catch(visitor::found) {
-        // Restore the removed edge.  Note it will likely be restored to
-        // a different location in boost's internal edge storage
-        boost::add_edge(start, target, prop, impl_->g_);
+        // Restore the removed edges
+        restore_edges(impl_->g_, saved);
         // The visitor has completed the polygon
         return result;
     }
 
-    // Restore the removed edge
-    boost::add_edge(start, target, prop, impl_->g_);
+    // Restore the removed edges
+    restore_edges(impl_->g_, saved);
     throw BadGraph("no polygon found");
 
 }

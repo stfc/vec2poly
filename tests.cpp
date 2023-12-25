@@ -472,12 +472,11 @@ static bool test_interior2()
     // Add edge 5: c->d or (-1,0) -> (-2,1)
     p.add_edge(1, 0, 5);
     auto status = p.is_valid(w);
-    if(status == poly_errno_t::POLY_GOOD)
-        std::cerr << "Polygon is valid\n";
-    else
-        std::cerr << "int2 Polygon is invalid: " << poly_errno_string(status) << "\n";
     p.linesegs(w);
-    return true;
+    if(status == poly_errno_t::POLY_GOOD)
+        return true;
+    std::cerr << "int2 Polygon is invalid: " << poly_errno_string(status) << "\n";
+    return false;
 }
 
 

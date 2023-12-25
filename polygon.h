@@ -43,6 +43,12 @@ enum class poly_errno_t {
 
 char const *poly_errno_string(poly_errno_t);
 
+/** A polygon class for connecting paths.
+ *
+ * It records a spanning subtree of a graph, eventually hitting the target node.
+ * While originally designed to hold polygons (closed sequences of paths),
+ * it has been refactored to support pathfinding in general.
+ */
 class polygon {
     /** The ith index is j if node i is first reached from j.
      * (The equivalent of the predecessor array in Dijkstra shortest path) */
@@ -51,7 +57,7 @@ class polygon {
      * The index is the node number of the destination node
      */
     std::vector<edge_t> edges_;
-    /** Start and end node of this polygon */
+    /** Start and end node of this polygon (if closed) */
     node_t start_;
     /** Invalid node number
      * This is used for uninitialised nodes (as opposed to using -1, say, which is not a valid node_t)
