@@ -64,17 +64,6 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
 }
 
 
-void polygon::linesegs(world const &w)
-{
-    path_lookup lookup(w);
-    for( auto &s :
-        edges_ 
-        | std::views::transform(lookup)
-        | std::views::join )
-        std::cerr << s << '\n';
-}
-
-
 /** Tidy a polygon by reducing it in size until it has nothing inside.
  *
  * This function is the last major algorithmic component: loop through
@@ -96,6 +85,9 @@ void polygon::tidy(const world &w)
 }
 
 
+/** Helper function for interior: calculate the weight
+ *
+ */
 /** Determine whether a point is interior to the polygon.
  * We may assume the test point never lies on a line segment
  * @param p test point
@@ -105,7 +97,19 @@ void polygon::tidy(const world &w)
  */
 bool polygon::interior(world &w, point p) const
 {
-    //unsigned
+    path_lookup lookup(w);
+    std::cerr << "Interior " << p << std::endl;
+    // This will go through all line segments in arbitrary order but that is OK for this purpose
+    auto const seqs = edges_
+            | std::views::transform(lookup)
+            | std::views::join
+            | std::views::transform([p](lineseg const &s) { return intersects(s,p); });
+    // Neither reduce nor accumulate is available in constrained form
+    auto const score = std::reduce(std::begin(seqs), std::end(seqs), 0u);
+    // Remember, double the score is returned, and p is interior if the score is odd
+    if(score & 1u)
+        throw BadPath("interior double score uneven");  // can't happen?
+    return score & 2u == 2u;
 }
 
 

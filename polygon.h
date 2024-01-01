@@ -119,13 +119,12 @@ public:
      * It assumes all paths are proper. */
     poly_errno_t is_valid(const world &) const noexcept;
 
-    /** Line segments in (currently) arbitrary order */
-    void linesegs(world const &);
-
     /** Use all world paths to tidy a polygon */
     void tidy(world const &);
 
-    /** Is a point interior to the polygon? */
+    /** Is a point interior to the polygon?
+     * Note that all edges (in edges_) must be valid at this point
+     * ie the polygon building must be fully finished */
     bool interior(world &, point) const;
 
     friend std::ostream &operator<<(std::ostream &, polygon const &);

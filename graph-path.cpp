@@ -210,8 +210,8 @@ polygon graph::pathfinder(node_t start, test_t goal, const graph::edgelist &avoi
     // to prohibit using the to-be-avoided edges)
     auto saved = save_edges(impl_->g_, avoid);
 
-    // For the search we need to connect the target to the starting point
-    // because we are making a return path around the unused edge
+    // For the search we need to connect start to a target point, with the
+    // polygon object collecting the spanning subtree starting at start
     visitor vis(goal, result);
     try {
         boost::breadth_first_search( impl_->g_, start, boost::visitor(vis) );
@@ -225,7 +225,7 @@ polygon graph::pathfinder(node_t start, test_t goal, const graph::edgelist &avoi
 
     // Restore the removed edges
     restore_edges(impl_->g_, saved);
-    throw BadGraph("no polygon found");
+    throw BadGraph("no path found");
 
 }
 

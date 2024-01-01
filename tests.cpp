@@ -472,7 +472,6 @@ static bool test_interior2()
     // Add edge 5: c->d or (-1,0) -> (-2,1)
     p.add_edge(1, 0, 5);
     auto status = p.is_valid(w);
-    p.linesegs(w);
     if(status == poly_errno_t::POLY_GOOD)
         return true;
     std::cerr << "int2 Polygon is invalid: " << poly_errno_string(status) << "\n";
@@ -480,9 +479,58 @@ static bool test_interior2()
 }
 
 
+/** Another helper function testing the polygon::interior function */
+static bool test_interior3()
+{
+    world w;
+    // Unlike any other polygon we work with, this one has a hole
+    //w.add_path({{1,0},{0,1},{-1,0},{0,-1},{1,0}});
+    w.add_path({{-1,3},{2,2},{5,0},{3,0},{5,-2},
+                {2,-1},{-1,-2},{-4,0},{-3,0},{-4,2},{-1,3}});
+    // Size is 1 because we have only one "branch point" (the chosen start/end point0
+    // and only one path
+    polygon poly(1,0);
+    poly.add_edge(0,0,0);
+    // Tuple of X, Y, Expected.
+    // Expected is 0=Exterior, 1=Interior, -1=(Possible) Exception
+    auto say = [](int expd) -> char const *
+    {
+        switch(expd) {
+            case -1: return "exception";
+            case  0: return "exterior";
+            case  1: return "interior";
+        }
+        return "canthappen";
+    };
+    std::vector<std::tuple<int,int,int>> const testdata =
+            {{0,0,1},{1,1,1},{-1,2,1},{-2,0,1},{-4,1,0},{-2,-2,0},{-1,-1,1},
+             {2,-2,0},{3,-1,1},{4,0,-1},{4,1,0},{3,2,0}};
+    for( auto const &data : testdata ) {
+        point p{static_cast<double>(std::get<0>(data)),
+                static_cast<double>(std::get<1>(data))};
+        try {
+            auto val = poly.interior(w, p);
+            if(val != (std::get<2>(data) == 1)) {
+                std::cerr << "int3 at " << p << " got " << say(val ? 1 : 0)
+                          << " expected " << say(std::get<2>(data)) << '\n';
+                return false;
+            }
+        }
+        catch (...) {
+            if(std::get<2>(data) != 2) {
+                std::cerr << "int3 at " << p << " got exception, expected "
+                          << say(std::get<2>(data)) << '\n';
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
 bool test_interior()
 {
-    return test_interior1() && test_interior2();
+    return test_interior1() && test_interior2() && test_interior3();
 }
 
 
