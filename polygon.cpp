@@ -85,9 +85,6 @@ void polygon::tidy(const world &w)
 }
 
 
-/** Helper function for interior: calculate the weight
- *
- */
 /** Determine whether a point is interior to the polygon.
  * We may assume the test point never lies on a line segment
  * @param p test point
@@ -109,7 +106,8 @@ bool polygon::interior(world &w, point p) const
     // Remember, double the score is returned, and p is interior if the score is odd
     if(score & 1u)
         throw BadPath("interior double score uneven");  // can't happen?
-    return score & 2u == 2u;
+    // interior if twice an odd number or congruent to two mod four
+    return (score & 2u) == 2u;
 }
 
 

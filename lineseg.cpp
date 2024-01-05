@@ -55,6 +55,8 @@ unsigned intersects(lineseg const &line, const point p)
 {
     point a{static_cast<point>(*line.first())},
             b{static_cast<point>(*line.second())};
+
+    // Simple intersection (extend right to open subset of line segment)
     if(between(a.y(), p.y(), b.y())) {
         double t = (p.y()-static_cast<double>(a.y()))/(b.y()-a.y());
 	// x coord of intersection with line segment
@@ -62,12 +64,19 @@ unsigned intersects(lineseg const &line, const point p)
 	// Intersection must be (strictly) to the right
         return x1 > p.x() ? 2 : 0;
     }
-    unsigned k = 0;
+
+    // Intersecting endpoint (boundary of line segment)
+    signed int k = 0;
+    auto sgn = [](decltype(p.y()) z) -> signed int { return z>0 ? 1 : -1; };
+
+    // Endpoints count according to whether they intersect in the same or opposite directions
     if(p.y() == a.y() && p.x() < a.x())
-        ++k;
+        k = sgn(b.y()-p.y());
     if(p.y() == b.y() && p.x() < b.x())
-        ++k;
-    return k;
+        k -= sgn(a.y()-p.y());
+
+    // Add large harmless number divisible by four
+    return static_cast<unsigned int>(k<0 ? k+16 : k);
 }
 
 
