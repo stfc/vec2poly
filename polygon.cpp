@@ -95,7 +95,6 @@ void polygon::tidy(const world &w)
 bool polygon::interior(world &w, point p) const
 {
     path_lookup lookup(w);
-    std::cerr << "Interior " << p << std::endl;
     // This will go through all line segments in arbitrary order but that is OK for this purpose
     auto const seqs = edges_
             | std::views::transform(lookup)

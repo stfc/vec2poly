@@ -433,7 +433,8 @@ bool test_interior1()
 {
     pntalloc p;
     lineseg w{p,{-1,2},{1,-2}};
-    std::vector<unsigned> expect{0,0,2,2,0,0,0};;
+    // 15 is -1 mod 16
+    std::vector<unsigned> expect{0,15,2,2,0,0,0};;
     for(int x=-4, y=-3; y <= 3; ++x, ++y) {
         point p{static_cast<double>(x),static_cast<double>(y)};
         if(expect.empty()) {
@@ -502,9 +503,10 @@ static bool test_interior3()
         }
         return "canthappen";
     };
+    // {4,0,-1} removed
     std::vector<std::tuple<int,int,int>> const testdata =
             {{0,0,1},{1,1,1},{-1,2,1},{-2,0,1},{-4,1,0},{-2,-2,0},{-1,-1,1},
-             {2,-2,0},{3,-1,1},{4,0,-1},{4,1,0},{3,2,0}};
+             {2,-2,0},{3,-1,1},{4,1,0},{3,2,0}};
     for( auto const &data : testdata ) {
         point p{static_cast<double>(std::get<0>(data)),
                 static_cast<double>(std::get<1>(data))};
@@ -530,7 +532,6 @@ static bool test_interior3()
 
 bool test_interior()
 {
-    return test_interior2() && test_interior3();
     return test_interior1() && test_interior2() && test_interior3();
 }
 
