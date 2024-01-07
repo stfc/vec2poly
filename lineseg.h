@@ -143,6 +143,9 @@ public:
 
     bool operator==(path const &) const noexcept = default;
 
+    /** Return a point somewhere internal to the path */
+    point testpoint() const;
+
     auto begin() const noexcept { return path_.begin(); }
     auto end() const noexcept { return path_.end(); }
     auto rbegin() const noexcept { return path_.rbegin(); }

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <functional>
+#include <numeric>
 #include "lineseg.h"
 #include "pntalloc.h"
 
@@ -161,6 +162,26 @@ void path::split_path(std::vector<path> &result, const std::vector<point> &at)
     if(!first.path_.empty())
         path_.splice(path_.end(), first.path_);
     return;
+}
+
+
+point path::testpoint() const
+{
+    auto beg = path_.cbegin();
+    auto end = path_.cend();
+    // If we have more than one segment, return the end of the first segment
+    auto as_point = [](pathpoint p) -> point { return *p; };
+    lineseg const &first = *beg++;
+    if(beg != end)
+        // By construction, the endpoint of the first segment is the start of the second
+        return as_point(first.second());
+    // If not, we try the midpoint
+    point a{as_point(first.first())}, b{as_point(first.second())};
+    point u{ std::midpoint(a.x(),b.x()), std::midpoint(a.y(),b.y())};
+    // Pathological case: if the line segment is very short, the midpoint might be squashed into an endpoint
+    if(a == u || b == u)
+        throw BadLineSegment("No midpoint on line segment");
+    return u;
 }
 
 
