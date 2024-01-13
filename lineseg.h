@@ -7,6 +7,7 @@
 
 #include <optional>
 #include <list>
+#include <vector>
 #include <set>
 #include <iosfwd>
 #include <utility>

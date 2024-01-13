@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include "point.h"
+#include "except.h"
 
 // world is defined in world.h
 class world;
@@ -43,6 +44,16 @@ enum class poly_errno_t {
 
 char const *poly_errno_string(poly_errno_t);
 
+class BadPolygon : public Vec2PolyException {
+    poly_errno_t err_;
+public:
+    BadPolygon(poly_errno_t err): err_(err) {}
+    [[nodiscard]] char const *what() const noexcept override { return poly_errno_string(err_); }
+    [[nodiscard]] poly_errno_t get_errno() const noexcept { return err_; }
+};
+
+
+
 /** A polygon class for connecting paths.
  *
  * It records a spanning subtree of a graph, eventually hitting the target node.
@@ -63,6 +74,25 @@ class polygon {
      * This is used for uninitialised nodes (as opposed to using -1, say, which is not a valid node_t)
      */
     node_t invalid_;
+
+    /** Replace a sequence of paths with another in the polygon.
+     *
+     * Prerequisites:
+     * 1. The given sequence of paths connect to each other, meaning the start or end point of one
+     *    equals the start or end point of the next path.
+     * 2. The unconnected points on the first and last path are nodes on the polygon.
+     *
+     * Paths are specified by their edge number ie index into the world's list of all paths.
+     * The latter is not modified.
+     *
+     * The polygon is altered as follows: the two points where the given path sequence
+     * intersect the polygon are used to split the polygon into two sequences of paths.
+     * The given path will replace one of these two path sequences in the polygon,
+     * thus shrinking the polygon if the argument paths are internal.
+     *
+     * The choice of which of the two possible polygons to keep is based on the keep path
+     * */
+    void replace_paths(world const &w, std::vector<edge_t> &paths, edge_t keep);
 
 public:
     /** Create a polygon of N vertices.

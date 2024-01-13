@@ -18,6 +18,57 @@ public:
 };
 
 
+
+/** Utility class to "walk" through a trail - a sequence of paths, calling a callback on each point on the trail.
+ *
+ * For a trail consisting of N paths, the callback will be called N+1 times.
+ * The problem is that some paths need to be traversed backwards as they are bidirectional.
+ */
+class trail_walk {
+public:
+    using callback_t = std::function<void(pathpoint)>;
+private:
+    path_lookup lookup_;
+    callback_t cb_;
+public:
+    trail_walk(world const &w, callback_t cb): lookup_(w), cb_(cb) {}
+    [[nodiscard]] std::pair<pathpoint,pathpoint> walk(polygon::poly_iterator begin, polygon::poly_iterator end);
+};
+
+
+std::pair<pathpoint,pathpoint> trail_walk::walk(polygon::poly_iterator begin, polygon::poly_iterator end)
+{
+    // A single-point polygon is not allowed
+    if(begin == end)
+        throw BadPolygon(poly_errno_t::POLY_EMPTY);
+
+    auto [a,b] = lookup_(*begin++).endpoints();
+
+    while (begin != end) {
+        auto p = lookup_(*begin).endpoints();
+        // path may need to be reversed to fit the polygon
+        if (a == p.first) {
+            a = p.second;
+            cb_(a);
+        } else if (a == p.second) {
+            a = p.first;
+            cb_(a);
+        } else if (b == p.first) {
+            b = p.second;
+            cb_(b);
+        } else if (b == p.second) {
+            b = p.first;
+            cb_(b);
+        } else
+            throw BadPolygon(poly_errno_t::POLY_BROKENPATH);
+        ++begin;
+    }
+    return {a,b};
+}
+
+
+
+
 poly_errno_t polygon::is_valid(const world &w) const noexcept
 {
     // We need the world map to map edge numbers to paths and real-world locations
@@ -26,37 +77,23 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
     std::vector<pathpoint> visited;
     // Remember the polygon iterator works backwards through paths, from start back to start
     auto e = begin(), m = end();
-    // A single-point polygon is not allowed
-    if(e == m)
-        return poly_errno_t::POLY_EMPTY;
-    // a and b are initialised to the endpoints of the first (last) edge
-    auto [a,b] = lookup(*e++).endpoints();
-
-    while (e != m) {
-        auto p = lookup(*e).endpoints();
-        // path may need to be reversed to fit the polygon
-        if (a == p.first) {
-            a = p.second;
-            visited.push_back(a);
-        } else if (a == p.second) {
-            a = p.first;
-            visited.push_back(a);
-        } else if (b == p.first) {
-            b = p.second;
-            visited.push_back(b);
-        } else if (b == p.second) {
-            b = p.first;
-            visited.push_back(b);
-        } else
-            return poly_errno_t::POLY_BROKENPATH;
-        ++e;
+    try {
+        auto add_to_visited = [&visited](pathpoint p) { visited.push_back(p); };
+        trail_walk trail(w, add_to_visited);
+        auto final = trail.walk(e, m);
+        // Polygon not closed
+        if(final.first != final.second)
+            return poly_errno_t::POLY_NOTCLOSED;
+        //visited.push_back(final.first);
     }
-    // Polygon not closed
-    if(a != b)
-        return poly_errno_t::POLY_NOTCLOSED;
+    catch(BadPolygon bp) {
+        return bp.get_errno();
+    }
     // Check non-intersection other than at start/end - could probably be optimised
-    visited.pop_back();
     auto all = visited.end();
+    // DEBUG
+    for( auto const &x : visited )
+        std::cerr << x << '\n';
     std::sort(visited.begin(), all);
     if(std::unique(visited.begin(), visited.end()) != all)
         return poly_errno_t::POLY_SELFINTERSECT;
@@ -79,9 +116,9 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
 
 void polygon::tidy(const world &w)
 {
-    // We need the world map to map edge numbers to paths and real-world locations
-    auto &worldmap{w.map()};
-    //while(!clean_path())
+    path_lookup lookup(w);
+    auto const paths = edges_
+        | std::views::transform(lookup);
 }
 
 
@@ -107,6 +144,11 @@ bool polygon::interior(world &w, point p) const
         throw BadPath("interior double score uneven");  // can't happen?
     // interior if twice an odd number or congruent to two mod four
     return (score & 2u) == 2u;
+}
+
+
+void polygon::replace_paths(world const &w, std::vector<edge_t> &paths, edge_t keep)
+{
 }
 
 
