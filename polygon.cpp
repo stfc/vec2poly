@@ -48,15 +48,16 @@ std::pair<pathpoint,pathpoint> trail_walk::walk(polygon::poly_iterator begin, po
         auto p = lookup_(*begin).endpoints();
         // path may need to be reversed to fit the polygon
         if (a == p.first) {
+            cb_(a);
             a = p.second;
-            cb_(a);
         } else if (a == p.second) {
-            a = p.first;
             cb_(a);
+            a = p.first;
         } else if (b == p.first) {
-            b = p.second;
             cb_(b);
+            b = p.second;
         } else if (b == p.second) {
+            cb_(b);
             b = p.first;
             cb_(b);
         } else
@@ -84,16 +85,12 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
         // Polygon not closed
         if(final.first != final.second)
             return poly_errno_t::POLY_NOTCLOSED;
-        //visited.push_back(final.first);
     }
     catch(BadPolygon bp) {
         return bp.get_errno();
     }
     // Check non-intersection other than at start/end - could probably be optimised
     auto all = visited.end();
-    // DEBUG
-    for( auto const &x : visited )
-        std::cerr << x << '\n';
     std::sort(visited.begin(), all);
     if(std::unique(visited.begin(), visited.end()) != all)
         return poly_errno_t::POLY_SELFINTERSECT;
