@@ -113,9 +113,33 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
 
 void polygon::tidy(const world &w)
 {
-    path_lookup lookup(w);
-    auto const paths = edges_
-        | std::views::transform(lookup);
+    /** All paths are
+     *  1. On the polygon
+     *  2. Wholly outside the polygon
+     *  3. Wholly inside the polygon
+     * We now need to connect paths inside the polygon and use them to
+     * reduce the polygon
+     */
+     edge_t index{0};
+     // Without an indexed iterator (it's in C++23) we have to do it ourselves
+     auto edge_index = [this,&index](path const &) -> bool
+     {
+         auto p = this->edges_.cbegin(), q = this->edges_.cend();
+         return std::find(p,q,index++) != q;
+     };
+     auto interiorp = [this,&w](path const &p)-> bool
+     {
+         return this->interior(w, p.testpoint());
+     };
+    // The paths remain in world so storing pointers is OK
+    std::set<path const *> candidates;
+    for( path const &p : w.paths()
+                         | std::views::filter(edge_index)
+                         | std::views::filter(interiorp) )
+        candidates.insert(&p);
+    // DEBUG
+    for( path const *y : candidates )
+        std::cerr << "Interior " << *y << '\n';
 }
 
 
@@ -126,7 +150,7 @@ void polygon::tidy(const world &w)
  *
  * @cite https://www.eecs.umich.edu/courses/eecs380/HANDOUTS/PROJ2/InsidePoly.html
  */
-bool polygon::interior(world &w, point p) const
+bool polygon::interior(const world &w, point p) const
 {
     path_lookup lookup(w);
     // This will go through all line segments in arbitrary order but that is OK for this purpose

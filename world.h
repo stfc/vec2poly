@@ -115,7 +115,7 @@ public:
     auto segments() { return std::ranges::views::join(map_); }
 
     /** Iterate over all paths */
-    auto paths() { return std::ranges::views::all(map_); }
+    auto paths() const { return std::ranges::views::all(map_); }
 
     /** Provide read-only access to the paths container */
     decltype(map_) const &map() const noexcept { return map_; }

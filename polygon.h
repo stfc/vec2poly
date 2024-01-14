@@ -78,9 +78,10 @@ class polygon {
     /** Replace a sequence of paths with another in the polygon.
      *
      * Prerequisites:
-     * 1. The given sequence of paths connect to each other, meaning the start or end point of one
-     *    equals the start or end point of the next path.
-     * 2. The unconnected points on the first and last path are nodes on the polygon.
+     * 1. The given sequences of paths (trails) connect to each other, meaning the start or end point
+     *    of one equals the start or end point of the other trail (albeit possibly in reverse)
+     * 2. The unconnected points on the first and last path, ie the endpoints of the trail
+     *    are nodes on the polygon.
      *
      * Paths are specified by their edge number ie index into the world's list of all paths.
      * The latter is not modified.
@@ -155,7 +156,7 @@ public:
     /** Is a point interior to the polygon?
      * Note that all edges (in edges_) must be valid at this point
      * ie the polygon building must be fully finished */
-    bool interior(world &, point) const;
+    bool interior(const world &w, point p) const;
 
     friend std::ostream &operator<<(std::ostream &, polygon const &);
 };
