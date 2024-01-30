@@ -42,6 +42,7 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 [[nodiscard]] static bool test_interior();
 /** Test cleaning a polygon */
 [[nodiscard]] static bool test_tidy_poly();
+/** Test tidying algorithm */
 
 
 static world make_world(int);
@@ -195,7 +196,7 @@ bool test_poly1()
     // Two line segments: a->b and b->c
     w.add_path(path(u, {a, b, c}));
     auto q = w.begin(); // point to first segment
-    ++q;        	// point to second and last segment
+    ++q;                // point to second and last segment
     // Add c->d
     q.insert_after(lineseg(u,c,d));
     auto &map = test_paths(w);
@@ -544,6 +545,15 @@ bool test_tidy_poly()
     // See description of node indices in doc for make_world
     // Four points, start at 0
     polygon poly(4,0);
+    // These are a subset of the "proper" paths to form a non-minimal polygon
+    poly.add_edge(1, 0, 0);      // 0->1
+    poly.add_edge(1, 2, 1);      // 1->2
+    poly.add_edge(3, 2, 2);      // 2->3
+    poly.add_edge(0, 3, 3);      // 3->0
+    //if(!poly.is_valid()) 
+    for( auto const &y : poly.interior_paths(w) ) {
+        std::cerr << y << std::endl;
+    }
     return true;
 }
 

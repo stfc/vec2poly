@@ -52,6 +52,7 @@ public:
     [[nodiscard]] poly_errno_t get_errno() const noexcept { return err_; }
 };
 
+#include "world.h"
 
 
 /** A polygon class for connecting paths.
@@ -157,6 +158,39 @@ public:
      * Note that all edges (in edges_) must be valid at this point
      * ie the polygon building must be fully finished */
     bool interior(const world &w, point p) const;
+
+    /** Identify interior paths
+     *
+     * Interior paths are candidates from removal from a polygon.
+     * This implementation needs to be here so the compiler can pick up the return type
+     */
+    auto interior_paths(world const &w)
+    {
+        /** All paths are
+         *  1. On the polygon
+         *  2. Wholly outside the polygon
+         *  3. Wholly inside the polygon
+         * We now need to connect paths inside the polygon and use them to
+         * reduce the polygon
+         */
+         edge_t index{0};
+
+         // Without an indexed iterator (it's in C++23) we have to do it ourselves
+         // - tracking the index we identify paths on the polygon
+         auto not_on_poly = [this,&index](path const &) -> bool
+         {
+             auto p = this->edges_.cbegin(), q = this->edges_.cend();
+             return std::find(p,q,index++) == q;
+         };
+         auto interiorp = [this,&w](path const &p)-> bool
+         {
+             return this->interior(w, p.testpoint());
+         };
+
+        return w.paths()
+               | std::views::filter(not_on_poly)
+               | std::views::filter(interiorp);
+    }
 
     friend std::ostream &operator<<(std::ostream &, polygon const &);
 };

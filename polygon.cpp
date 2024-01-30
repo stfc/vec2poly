@@ -111,35 +111,8 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
  * @param w World object, containing all the paths in the world
  */
 
-void polygon::tidy(const world &w)
+void polygon::tidy(world const &w)
 {
-    /** All paths are
-     *  1. On the polygon
-     *  2. Wholly outside the polygon
-     *  3. Wholly inside the polygon
-     * We now need to connect paths inside the polygon and use them to
-     * reduce the polygon
-     */
-     edge_t index{0};
-     // Without an indexed iterator (it's in C++23) we have to do it ourselves
-     auto edge_index = [this,&index](path const &) -> bool
-     {
-         auto p = this->edges_.cbegin(), q = this->edges_.cend();
-         return std::find(p,q,index++) != q;
-     };
-     auto interiorp = [this,&w](path const &p)-> bool
-     {
-         return this->interior(w, p.testpoint());
-     };
-    // The paths remain in world so storing pointers is OK
-    std::set<path const *> candidates;
-    for( path const &p : w.paths()
-                         | std::views::filter(edge_index)
-                         | std::views::filter(interiorp) )
-        candidates.insert(&p);
-    // DEBUG
-    for( path const *y : candidates )
-        std::cerr << "Interior " << *y << '\n';
 }
 
 
