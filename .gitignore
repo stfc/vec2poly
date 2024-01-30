@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Fig backups
+*.bak
+
+# Emacs backups
+*~
