@@ -45,11 +45,11 @@ private:
     /** x and y coordinates of point */
     signed long x_, y_;
 public:
-    point(double x, double y): x_(std::round(x/tol)), y_(std::round(y/tol)) {}
+    constexpr point(signed long x, signed long y): x_(x), y_(y) {}
 
-    bool operator==(point const &other) const noexcept = default;
-    bool operator!=(point const &other) const noexcept = default;
-    bool operator<(point const &other) const noexcept
+    constexpr bool operator==(point const &other) const noexcept = default;
+    constexpr bool operator!=(point const &other) const noexcept = default;
+    constexpr bool operator<(point const &other) const noexcept
     {
         if(*this == other) return false;
         if(x_ < other.x_) {
@@ -59,13 +59,8 @@ public:
         return x_ == other.x_ && y_ < other.y_;
     }
 
-    [[nodiscard]] double x() const noexcept { return x_*tol; }
-    [[nodiscard]] double y() const noexcept { return y_*tol; }
-
-    static bool zero(double z) noexcept { return fabs(z)<tol; }
-
-    /** Tolerance for equality */
-    static double tol;
+    [[nodiscard]] constexpr auto x() const noexcept { return x_; }
+    [[nodiscard]] constexpr auto y() const noexcept { return y_; }
 
 };
 

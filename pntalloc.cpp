@@ -7,7 +7,7 @@
 #include "pntalloc.h"
 
 
-pntalloc::pntalloc() noexcept
+pntalloc::pntalloc(double tol) noexcept : tol_(tol)
 {
     // XXX temporary work
     mem_.reserve(1000);

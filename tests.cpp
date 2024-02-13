@@ -93,7 +93,7 @@ int tests()
 
 bool test_pntalloc()
 {
-    pntalloc z;
+    pntalloc z(0.01);
     pathpoint u1 = z.make_point(1,2);
     pathpoint u2 = z.make_point(3,4);
     pathpoint u3 = z.make_point(1,2);
@@ -105,7 +105,7 @@ bool test_pntalloc()
 bool
 test_lineseg()
 {
-    pntalloc u;
+    pntalloc u(0.01);
     // a b define a line y = x/3
     // c-f are collinear, on the line y = -2x+14
     point   a = point(0, 0),
@@ -150,7 +150,7 @@ expect(pntalloc &u, int i, lineseg const &v, lineseg const &w, std::optional<poi
 
 bool test_split_seg()
 {
-    pntalloc u;
+    pntalloc u(0.01);
     point a(-1,-1), b(2,1), c(3, 0);
     lineseg ac(u,a,c);
     // Splitting at b should turn a->c into a->b while returning b->c
@@ -179,7 +179,7 @@ bool test_split_seg()
 
 bool test_poly1()
 {
-    world w;
+    world w(0.01);
     pntalloc &u = test_allocator(w);
     // World is empty, so should not iterate here
     for( auto const &y : w ) {
@@ -227,7 +227,7 @@ bool test_poly1()
 
 bool test_poly2()
 {
-    world w;
+    world w(0.01);
     pntalloc &u = test_allocator(w);
     w.add_path(path{u, {{-2, 2},{-1,2},{-1,-2},{2,-2},{2,1},{3,2}}});
     w.add_path(path{u, {{-3, 1},{3,1}}});
@@ -280,7 +280,7 @@ bool test_poly2()
 
 bool test_path_iter()
 {
-    world w;
+    world w(0.01);
     point   a = {1, 1},
             b = {2,2},
             c = {3,4},
@@ -300,7 +300,7 @@ bool test_path_iter()
 bool test_branch_points()
 {
     world w{make_world(4)};
-    // Expecting {-1,0},{0,0},{1,1},{-2,1}
+    // Expecting {-1.0},{0,0},{1,1},{-2,1}
     std::set<point> const expect{{-1,0},{0,0},{1,1},{-2,1}};
     std::set<point> found;
     // though not necessarily in that order
@@ -351,7 +351,7 @@ static bool test_path_split1(std::vector<point> const &at, std::initializer_list
 bool test_path_split()
 {
     std::vector<point> at;
-    at.push_back(point(-2,1)); // d
+    at.emplace_back(-2,1); // d
     // Result should be a single path d->a->b->c->d
     if(!test_path_split1(at, {{{-2,1},{-3,2},{-3,0},{-1,0},{-2,1}}}))
         return false;
@@ -432,12 +432,12 @@ bool test_make_poly2()
 /* Helper function for test_interior testing the helper function for interior... */
 bool test_interior1()
 {
-    pntalloc p;
+    pntalloc p(0.01);
     lineseg w{p,{-1,2},{1,-2}};
     // 15 is -1 mod 16
     std::vector<unsigned> expect{0,15,2,2,0,0,0};;
     for(int x=-4, y=-3; y <= 3; ++x, ++y) {
-        point p{static_cast<double>(x),static_cast<double>(y)};
+        point p{x,y};
         if(expect.empty()) {
             std::cerr << "test_int1 ran out of expected values?\n";
             return false;
@@ -484,7 +484,7 @@ static bool test_interior2()
 /** Another helper function testing the polygon::interior function */
 static bool test_interior3()
 {
-    world w;
+    world w(0.01);
     // Unlike any other polygon we work with, this one has a hole
     //w.add_path({{1,0},{0,1},{-1,0},{0,-1},{1,0}});
     w.add_path({{-1,3},{2,2},{5,0},{3,0},{5,-2},
@@ -509,8 +509,8 @@ static bool test_interior3()
             {{0,0,1},{1,1,1},{-1,2,1},{-2,0,1},{-4,1,0},{-2,-2,0},{-1,-1,1},
              {2,-2,0},{3,-1,1},{4,1,0},{3,2,0}};
     for( auto const &data : testdata ) {
-        point p{static_cast<double>(std::get<0>(data)),
-                static_cast<double>(std::get<1>(data))};
+        point p{std::get<0>(data),
+                std::get<1>(data)};
         try {
             auto val = poly.interior(w, p);
             if(val != (std::get<2>(data) == 1)) {
@@ -599,7 +599,7 @@ bool test_tidy_poly()
 
 world make_world(int k)
 {
-    world w;
+    world w(0.01);
     // Triangle one
     point c = point(-1, 0), b = point(-3, 0), a = point(-3, 2);
     // Triangle two

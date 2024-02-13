@@ -5,8 +5,6 @@
 #include "point.h"
 #include <iostream>
 
-double point::tol = 0.01;
-
 
 std::ostream &
 operator<<(std::ostream &os, point const &p)

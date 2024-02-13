@@ -91,7 +91,7 @@ private:
 
 public:
 
-    world() = default;
+    world(double tol) : map_(), alloc_(tol) {}
     world(world const &) = delete;
     world(world &&) = default;
     world &operator=(world const &) = delete;

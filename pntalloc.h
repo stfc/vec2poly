@@ -16,13 +16,15 @@ class world;
 class pntalloc {
 private:
     std::vector<xpathpoint> mem_;
+    /** tolerance for snapping points to grid */
+    double tol_;
 
-    pntalloc() noexcept;
+    pntalloc(double tol) noexcept;
 public:
     pathpoint make_point(point z);
     pathpoint make_point(double x, double y)
     {
-        point q(x,y);
+        point q(std::round(x/tol_),std::round(y/tol_));
         return make_point(q);
     }
 
