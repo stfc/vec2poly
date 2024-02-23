@@ -14,7 +14,6 @@
 #include <memory>
 #include <functional>
 #include "point.h"
-#include "pntalloc.h"
 #include "except.h"
 
 
@@ -30,33 +29,28 @@ public:
 };
 
 
+class pntalloc;
+
 class lineseg {
 private:
     /** The line segment is a point from A to B */
     pathpoint a_, b_;
     /** Once the points are defined we can calculate the vector A->B */
     double dx_, dy_;
-    void recalculate()
+    void recalculate(double tol)
     {
-        dx_ = b_->x() - a_->x();
-        dy_ = b_->y() - a_->y();
-    }
-public:
-    lineseg(pntalloc &alloc, point a, point b) : a_(alloc.make_point(a)), b_(alloc.make_point(b)), dx_(b.x() - a.x()), dy_(b.y() - a.y())
-    {
+        dx_ = (b_->x() - a_->x())*tol;
+        dy_ = (b_->y() - a_->y())*tol;
 #if 0
         if(dx_*dx_+dy_*dy_ < point::tol2)
             throw BadLineSegment();
 #endif
     }
-    lineseg(pntalloc &alloc, point a, pathpoint b) : a_(alloc.make_point(a)), b_(b)
-    {
-        recalculate();
-    }
-    lineseg(pntalloc &, pathpoint a, pathpoint b) noexcept : a_(a), b_(b)
-    {
-        recalculate();
-    }
+
+    // Constructor become private as the point allocator pntalloc now constructs line segments, too
+    lineseg(pntalloc &, pathpoint a, pathpoint b) noexcept;
+
+public:
     /* Note copying a line segment should not increase the use counter */
     lineseg(lineseg const &) = default;
     lineseg(lineseg &&) = default;
@@ -95,6 +89,10 @@ public:
     {
         return a_->equals(p) || b_->equals(p);
     }
+
+    // access to constructor
+    friend class pntalloc;
+
     friend std::optional<point> intersects(lineseg const &v, lineseg const &w);
     friend std::ostream &operator<<(std::ostream &, lineseg const &);
 };

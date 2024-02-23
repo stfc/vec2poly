@@ -12,6 +12,13 @@
 #include "pntalloc.h"
 
 
+lineseg::lineseg(pntalloc &alloc, pathpoint a, pathpoint b) noexcept : a_(a), b_(b)
+{
+    recalculate(alloc.tol());
+}
+
+
+
 lineseg lineseg::split_at(pntalloc &alloc, point p)
 {
     if(is_endpoint(p))
@@ -19,7 +26,7 @@ lineseg lineseg::split_at(pntalloc &alloc, point p)
     pathpoint const q{b_};
     b_ = alloc.make_point(p);
     dx_ = b_->x() - a_->x(); dy_ = b_->y() - a_->y();
-    return lineseg(alloc, p, q);
+    return alloc.make_lineseg(p, q);
 }
 
 
