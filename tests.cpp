@@ -109,20 +109,20 @@ test_lineseg()
     // a b define a line y = x/3
     // c-f are collinear, on the line y = -2x+14
     point   a = point(0, 0),
-            b = point(9,3),
-            c = point(4,6),
-            d = point(5,4),
-            e = point(6,2),
-            f = point(7,0);
-    lineseg ab(u, a, b);
+            b = point(900,300),
+            c = point(400,600),
+            d = point(500,400),
+            e = point(600,200),
+            f = point(700,0);
+    const auto ab = u.make_lineseg(a, b);
     bool ret = true;
-    ret &= expect(u, 1, ab, lineseg(u, c, f), e);
-    ret &= expect(u, 2, ab, lineseg(u, c, d), std::nullopt);
-    ret &= expect(u, 3, ab, lineseg(u, c, e), e);
-    ret &= expect(u, 4, lineseg(u, a, e), lineseg(u, c, e), e);
-    lineseg gh(u, point(1, 3), point(5, -1));
-    ret &= expect(u, 5, ab, gh, point(3,1));
-    ret &= expect(u, 6, gh, ab, point(3,1));
+    ret &= expect(u, 1, ab, u.make_lineseg(c, f), e);
+    ret &= expect(u, 2, ab, u.make_lineseg(c, d), std::nullopt);
+    ret &= expect(u, 3, ab, u.make_lineseg(c, e), e);
+    ret &= expect(u, 4, u.make_lineseg(a, e), u.make_lineseg(c, e), e);
+    const auto gh = u.make_lineseg(u.make_point(100, 300), point{500, -100});
+    ret &= expect(u, 5, ab, gh, point{300,100});
+    ret &= expect(u, 6, gh, ab, point{300,100});
     return ret;
 }
 
@@ -134,14 +134,14 @@ expect(pntalloc &u, int i, lineseg const &v, lineseg const &w, std::optional<poi
     std::optional<point> z = intersects(v, w);
     if(z.has_value() && expt.has_value()) {
         if(z.value() != expt.value()) {
-            std::cerr << "Test " << i << " expected " << expt.value() << " got " << z.value() << std::endl;
+            std::cerr << "subtest " << i << " expected " << expt.value() << " got " << z.value() << std::endl;
             ret = false;
         }
     } else if(z.has_value() && !expt.has_value()) {
-        std::cerr << "Test " << i << " expected no intersection, got " << z.value() << std::endl;
+        std::cerr << "subtest " << i << " expected no intersection, got " << z.value() << std::endl;
         ret = false;
     } else if(!z.has_value() && expt.has_value()) {
-        std::cerr << "Test " << i << " expected " << expt.value() << " got no intersection" << std::endl;
+        std::cerr << "subtest " << i << " expected " << expt.value() << " got no intersection" << std::endl;
         ret = false;
     }
     return ret;
@@ -152,7 +152,7 @@ bool test_split_seg()
 {
     pntalloc u(0.01);
     point a(-1,-1), b(2,1), c(3, 0);
-    lineseg ac(u,a,c);
+    auto ac = u.make_lineseg(a,c);
     // Splitting at b should turn a->c into a->b while returning b->c
     auto bc{ac.split_at(u,b)};
     auto a1{ac.first()}, b1{ac.last()}, b2{bc.first()}, c2{bc.last()};
@@ -198,7 +198,7 @@ bool test_poly1()
     auto q = w.begin(); // point to first segment
     ++q;                // point to second and last segment
     // Add c->d
-    q.insert_after(lineseg(u,c,d));
+    q.insert_after(u.make_lineseg(c,d));
     auto &map = test_paths(w);
     if( map[0] != path(u, {a, b, c, d})) {
         std::cerr << "Insertion failed: " << map[0] << '\n';
@@ -209,7 +209,7 @@ bool test_poly1()
     // Adding a path may have invalidated the iterator, so we refresh it
     q = w.begin(); ++q; ++q; ++q;
     // q should now reference the single line segment on the second path
-    q.insert_after(lineseg(u,f,o));
+    q.insert_after(u.make_lineseg(f,o));
     if(map.size() != 2) {
         std::cerr << "Expected two paths; found " << map.size() << '\n';
         return false;
@@ -220,7 +220,7 @@ bool test_poly1()
     }
     // Finally, an insert at not-the-end - q still points to the *first* entry on path 2
     // This is a dummy line segment, not usually useful (or permitted)
-    q.insert_after(lineseg(u,f,f));
+    q.insert_after(u.make_lineseg(f,f));
     return true;
 }
 
@@ -433,7 +433,7 @@ bool test_make_poly2()
 bool test_interior1()
 {
     pntalloc p(0.01);
-    lineseg w{p,{-1,2},{1,-2}};
+    auto w = p.make_lineseg({-1,2},{1,-2});
     // 15 is -1 mod 16
     std::vector<unsigned> expect{0,15,2,2,0,0,0};;
     for(int x=-4, y=-3; y <= 3; ++x, ++y) {

@@ -32,9 +32,11 @@ lineseg lineseg::split_at(pntalloc &alloc, point p)
 
 std::optional<point> intersects(lineseg const &v, lineseg const &w)
 {
+    // XXX temporary tolerance measure
+    const double tol = 0.001;
     // Determinant
     auto det = w.dx_ * v.dy_ - w.dy_ * v.dx_;
-    if( point::zero(det) )
+    if( std::fabs(det) < tol )
         return std::nullopt;
     // Vector to solve against (see docs for details)
 //    lineseg k(alloc, v.b_, w.b_);
@@ -42,8 +44,8 @@ std::optional<point> intersects(lineseg const &v, lineseg const &w)
     // s is the coefficient along v; t is the coefficient along w
     double s = (w.dy_ * kdx - w.dx_ * kdy)/det;
     double t = (v.dy_ * kdx - v.dx_ * kdy)/det;
-    if(-point::tol < s && s < 1.0 + point::tol &&
-       -point::tol < t && t < 1.0 + point::tol )
+    if(-tol < s && s < 1.0 + tol &&
+       -tol < t && t < 1.0 + tol )
     {
         point z{w.b_->x(), w.b_->y()};
         return point(z.x()-t*w.dx_,z.y()-t*w.dy_);
@@ -101,8 +103,8 @@ path::path(pntalloc &alloc, std::initializer_list<point> q) : path_()
         throw BadPath("Path too short");
     // adjacent/pairwise not available until C++23... and zip
     point prev{*q.begin()};
-    for( auto const &y : std::ranges::views::drop(q, 1)) {
-        path_.emplace_back(alloc, prev, y);
+    for( auto const &y : std::ranges::views::drop(q, 1) ) {
+        path_.emplace_back(alloc.make_lineseg(prev, y));
         prev = y;
     }
 }

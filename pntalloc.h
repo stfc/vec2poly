@@ -9,6 +9,7 @@
 #include <memory>
 #include <ranges>
 #include <vector>
+#include <concepts>
 #include "point.h"
 #include "lineseg.h"
 
@@ -23,10 +24,19 @@ private:
     pntalloc(double tol) noexcept;
 public:
     pathpoint make_point(point z);
+
     pathpoint make_point(double x, double y)
     {
+	// XXX check for loss of precision
         point q(std::round(x/tol_),std::round(y/tol_));
         return make_point(q);
+    }
+
+    template<typename A, typename B>
+    requires std::convertible_to<A,double> && std::convertible_to<B,double>
+    pathpoint make_point(A const x, B const y)
+    {
+         return make_point(static_cast<double>(x), static_cast<double>(y));
     }
 
     std::ranges::view auto points() noexcept
