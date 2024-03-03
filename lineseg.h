@@ -39,8 +39,8 @@ private:
     double dx_, dy_;
     void recalculate(double tol)
     {
-        dx_ = (b_->x() - a_->x())*tol;
-        dy_ = (b_->y() - a_->y())*tol;
+        dx_ = b_->x() - a_->x();
+        dy_ = b_->y() - a_->y();
 #if 0
         if(dx_*dx_+dy_*dy_ < point::tol2)
             throw BadLineSegment();

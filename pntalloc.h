@@ -55,20 +55,20 @@ public:
 
     lineseg make_lineseg(pathpoint a, point b)
     {
-	return make_lineseg(a, make_point(b));
+        return make_lineseg(a, make_point(b));
     }
     lineseg make_lineseg(point a, pathpoint b)
     {
-	return make_lineseg(make_point(a), b);
+        return make_lineseg(make_point(a), b);
     }
     lineseg make_lineseg(point a, point b)
     {
-	return make_lineseg(make_point(a), make_point(b));
+        return make_lineseg(make_point(a), make_point(b));
     }
 
     lineseg make_lineseg(pathpoint a, pathpoint b)
     {
-	return lineseg(*this, a, b);
+        return lineseg(*this, a, b);
     }
 
     double tol() const noexcept { return tol_; }

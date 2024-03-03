@@ -120,7 +120,7 @@ test_lineseg()
     ret &= expect(u, 2, ab, u.make_lineseg(c, d), std::nullopt);
     ret &= expect(u, 3, ab, u.make_lineseg(c, e), e);
     ret &= expect(u, 4, u.make_lineseg(a, e), u.make_lineseg(c, e), e);
-    const auto gh = u.make_lineseg(u.make_point(100, 300), point{500, -100});
+    const auto gh = u.make_lineseg(u.make_point(1, 3), point{500, -100});
     ret &= expect(u, 5, ab, gh, point{300,100});
     ret &= expect(u, 6, gh, ab, point{300,100});
     return ret;
