@@ -30,5 +30,7 @@ add_executable(vec2poly main.cpp
         except.h
         polygon.cpp
         polygon.h
+        perf.cpp
+        perf.h
 )
 

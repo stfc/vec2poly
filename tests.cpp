@@ -13,6 +13,7 @@
 #include "pntalloc.h"
 #include "graph-path.h"
 #include "polygon.h"
+#include "perf.h"
 
 bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<point>);
 
@@ -42,7 +43,10 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 [[nodiscard]] static bool test_interior();
 /** Test cleaning a polygon */
 [[nodiscard]] static bool test_tidy_poly();
+/** big world generator test */
+[[nodiscard]] static bool test_bigworld();
 /** Test tidying algorithm */
+[[nodiscard]] static bool test_tidy_poly2();
 
 
 static world make_world(int);
@@ -66,9 +70,10 @@ int tests()
     bool ret = true;
     unsigned num{0};
     // Tests are to be run in this order
-    std::array<std::function<bool()>,12> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
+    std::array<std::function<bool()>,14> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
                                             test_poly2, test_path_iter, test_branch_points, test_path_split,
-                                            test_make_poly1, test_make_poly2, test_interior, test_tidy_poly };
+                                            test_make_poly1, test_make_poly2, test_interior, test_tidy_poly,
+                                            test_bigworld, test_tidy_poly2};
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -618,3 +623,16 @@ world make_world(int k)
     return w;
 }
 
+
+bool test_bigworld()
+{
+    world w = make_big_world(2);
+    std::cerr << w;
+    return true;
+}
+
+
+bool test_tidy_poly2()
+{
+    return true;
+}

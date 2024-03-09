@@ -1,6 +1,7 @@
 * Worry about numerical stability in intersects()
 * Auto-derive sensible tolerance value from input parameters
   * Permit a snap-to-grid instead of just Euclidean distance? [DONE]
+  * Check if there is loss in int/double conversion in the point factory
 * Doesn't detect (much less handle) line segments that intersect in more than one pathpoint (ie parallel and overlapping)
 * Link test code only for debug builds (or use a test framework like gtest?)
 * Prevent code outside of the pathpoint factory generating points?
