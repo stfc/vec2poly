@@ -301,7 +301,8 @@ bool test_branch_points()
 {
     world w{make_world(4)};
     // Expecting {-1.0},{0,0},{1,1},{-2,1}
-    std::set<point> const expect{{-1,0},{0,0},{1,1},{-2,1}};
+    // (world grid factor is 0.01)
+    std::set<point> const expect{{-100,0},{0,0},{100,100},{-200,100}};
     std::set<point> found;
     // though not necessarily in that order
     for( auto p : w.branch_points() )
@@ -351,23 +352,23 @@ static bool test_path_split1(std::vector<point> const &at, std::initializer_list
 bool test_path_split()
 {
     std::vector<point> at;
-    at.emplace_back(-2,1); // d
+    at.emplace_back(-200,100); // d
     // Result should be a single path d->a->b->c->d
-    if(!test_path_split1(at, {{{-2,1},{-3,2},{-3,0},{-1,0},{-2,1}}}))
+    if(!test_path_split1(at, {{{-200,100},{-300,200},{-300,0},{-100,0},{-200,100}}}))
         return false;
     at.clear();
-    at.emplace_back(1,0);
-    at.emplace_back(-3,2); // a
-    at.emplace_back(-1,0); // c
-    at.emplace_back(1,1);
+    at.emplace_back(100,0);
+    at.emplace_back(-300,200); // a
+    at.emplace_back(-100,0); // c
+    at.emplace_back(100,100);
     // Result should be two paths a->b->c and c->d->a
-    if(!test_path_split1(at, {{{-3,2},{-3,0},{-1,0}},{{-1,0},{-2,1},{-3,2}}}))
+    if(!test_path_split1(at, {{{-300,200},{-300,0},{-100,0}},{{-100,0},{-200,100},{-300,200}}}))
         return false;
     at.clear();
-    at.emplace_back(-1,0); // c
-    at.emplace_back(-3,0); // b
+    at.emplace_back(-100,0); // c
+    at.emplace_back(-300,0); // b
     // Result should be two paths b->c and c->d->a->b
-    if(!test_path_split1(at,{{{-3,2},{-3,0}},{{-3,0},{-1,0}},{{-1,0},{-2,1},{-3,2}}}))
+    if(!test_path_split1(at,{{{-300,200},{-300,0}},{{-300,0},{-100,0}},{{-100,0},{-200,100},{-300,200}}}))
         return false;
     return true;
 }
@@ -601,11 +602,11 @@ world make_world(int k)
 {
     world w(0.01);
     // Triangle one
-    point c = point(-1, 0), b = point(-3, 0), a = point(-3, 2);
+    point c = point(-100, 0), b = point(-300, 0), a = point(-300, 200);
     // Triangle two
-    point h = point(0, 0), i = point(1, 0), g = point(1, 1);
+    point h = point(0, 0), i = point(100, 0), g = point(100, 100);
     // Connecting line
-    point d = point(-2, 1), e = point(-1, 2), f = point(0, 2);
+    point d = point(-200, 100), e = point(-100, 200), f = point(0, 200);
     w.add_path({a, b, c, d, a});
     if(k>=2)
         w.add_path({d, e, f, g});
