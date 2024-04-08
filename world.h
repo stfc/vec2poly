@@ -144,6 +144,9 @@ public:
     // defined in polygon.cpp
     friend class path_lookup;
 
+    // defined in iobase.h
+    friend class iobase;
+
     // regression testing functions break encapsulation
     friend pntalloc &test_allocator(world &);
     friend decltype(world::map_) &test_paths(world &);

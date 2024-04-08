@@ -464,7 +464,7 @@ bool test_interior1()
 }
 
 
-/* Helper function for test_interior testing polynomial */
+/* Helper function for test_interior testing polygon */
 static bool test_interior2()
 {
     world w{make_world(4)};

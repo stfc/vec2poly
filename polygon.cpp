@@ -9,33 +9,6 @@
 #include "world.h"
 
 
-/** Adaptor object to convert a edge number (edge_t) to an actual path */
-class path_lookup final {
-    world const &w_;
-public:
-    path_lookup(world const &w): w_(w) {}
-    path const &operator()(edge_t e) const { return w_.map_[e]; }
-};
-
-
-
-/** Utility class to "walk" through a trail - a sequence of paths, calling a callback on each point on the trail.
- *
- * For a trail consisting of N paths, the callback will be called N+1 times.
- * The problem is that some paths need to be traversed backwards as they are bidirectional.
- */
-class trail_walk {
-public:
-    using callback_t = std::function<void(pathpoint)>;
-private:
-    path_lookup lookup_;
-    callback_t cb_;
-public:
-    trail_walk(world const &w, callback_t cb): lookup_(w), cb_(cb) {}
-    [[nodiscard]] std::pair<pathpoint,pathpoint> walk(polygon::poly_iterator begin, polygon::poly_iterator end);
-};
-
-
 std::pair<pathpoint,pathpoint> trail_walk::walk(polygon::poly_iterator begin, polygon::poly_iterator end)
 {
     // A single-point polygon is not allowed

@@ -32,5 +32,9 @@ add_executable(vec2poly main.cpp
         polygon.h
         perf.cpp
         perf.h
+        iobase.cpp
+        iobase.h
+        toplevel.cpp
+        toplevel.h
 )
 
