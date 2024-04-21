@@ -15,10 +15,12 @@
  */
 
 class iobase {
+protected:
     world const &w_;
     graph const &g_;
-protected:
     double tol_;
+    virtual void writepoint(std::ostream &os, point x) { os << x; };
+    virtual void writepoint(std::ostream &os, const pathpoint q) { os << static_cast<point>(*q); }
     virtual void preamble(std::ostream &) {};
     virtual void writepath(std::ostream &os, path const &p) { os << p; };
     virtual void writepolygon(std::ostream &os, polygon const &p) { os << p; }
@@ -26,16 +28,23 @@ protected:
 public:
     iobase(world const &, graph const &);
     virtual void writeworld(std::ostream &);
-    virtual ~iobase();
+    virtual ~iobase() = default;
 };
 
 
 class ioxfig : public iobase {
+private:
+    /* points printed per line, used by writepoint */
+    size_t pppl;
+    const size_t pppl_max = 6;
+protected:
+    void writepoint(std::ostream &, point) override;
 public:
     ioxfig(world const &w, graph const &g) : iobase(w, g) {}
 
-    void preamble(std::ostream &);
-    void writepath(std::ostream &os, const path &p);
+    void preamble(std::ostream &) override;
+    void writepath(std::ostream &os, const path &p) override;
+    void writepolygon(std::ostream &, const polygon &) override;
 };
 
 

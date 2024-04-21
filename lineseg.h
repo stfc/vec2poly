@@ -63,9 +63,9 @@ public:
     {
         return a_ == other.a_ && b_ == other.b_;
     }
-    pathpoint first() const noexcept { return a_; }
-    pathpoint second() const noexcept { return b_; }
-    pathpoint last() const noexcept { return b_; }
+    [[nodiscard]] const pathpoint first() const noexcept { return a_; }
+    [[nodiscard]] const pathpoint second() const noexcept { return b_; }
+    [[nodiscard]] const pathpoint last() const noexcept { return b_; }
     //std::pair<pathpoint,pathpoint> endpoints() const noexcept { return std::pair(a_, b_); }
 
     /** Reverse in-place */
@@ -150,6 +150,8 @@ public:
     auto rbegin() const noexcept { return path_.rbegin(); }
     auto rend() const noexcept { return path_.rend(); }
 
+    /** Return size of list, so potentially O(N) complexity */
+    auto size() const noexcept { return path_.size(); }
     /* This breaks encapsulation but can be Fixed Later(tm) */
     friend class world;
     friend std::ostream &operator<<(std::ostream &, path const &);

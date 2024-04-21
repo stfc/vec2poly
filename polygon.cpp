@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <algorithm>
 #include "polygon.h"
 #include "world.h"
 
@@ -116,6 +117,13 @@ bool polygon::interior(const world &w, point p) const
 
 void polygon::replace_paths(world const &w, std::vector<edge_t> &paths, edge_t keep)
 {
+}
+
+
+size_t polygon::size(world const &w) const noexcept
+{
+    path_lookup q(w);
+    return std::transform_reduce(edges_.cbegin(), edges_.cend(), 0, std::plus{}, [&q](edge_t e) { return q(e).size(); });
 }
 
 

@@ -155,6 +155,11 @@ public:
     /** Use all world paths to tidy a polygon */
     void tidy(world const &);
 
+    /** Size of polygon (number of points).
+     * Note may be expensive to run (as in O(N))
+     */
+    size_t size(world const &w) const noexcept;
+
     /** Is a point interior to the polygon?
      * Note that all edges (in edges_) must be valid at this point
      * ie the polygon building must be fully finished */
