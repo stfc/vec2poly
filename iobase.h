@@ -8,6 +8,7 @@
 #include "world.h"
 #include "polygon.h"
 #include "graph-path.h"
+#include "toplevel.h"
 
 /** iobase - format world or polygon(s) to stream
  *

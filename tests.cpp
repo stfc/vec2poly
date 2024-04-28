@@ -14,6 +14,8 @@
 #include "graph-path.h"
 #include "polygon.h"
 #include "perf.h"
+#include "toplevel.h"
+#include "iobase.h"
 
 bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<point>);
 
@@ -47,7 +49,8 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 [[nodiscard]] static bool test_bigworld();
 /** Test tidying algorithm */
 [[nodiscard]] static bool test_tidy_poly2();
-
+/** Test printer */
+[[nodiscard]] static bool test_io_w();
 
 static world make_world(int);
 
@@ -70,10 +73,10 @@ int tests()
     bool ret = true;
     unsigned num{0};
     // Tests are to be run in this order
-    std::array<std::function<bool()>,14> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
+    std::array<std::function<bool()>,15> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
                                             test_poly2, test_path_iter, test_branch_points, test_path_split,
                                             test_make_poly1, test_make_poly2, test_interior, test_tidy_poly,
-                                            test_bigworld, test_tidy_poly2};
+                                            test_bigworld, test_tidy_poly2, test_io_w};
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -563,6 +566,16 @@ bool test_tidy_poly()
     return true;
 }
 
+
+bool test_io_w()
+{
+    world w{make_world(4)};
+    w.proper_paths();
+    toplevel top(w);
+    iobase *io = top.make_io(toplevel::io_type_t::IO_W_XFIG);
+    io->writeworld(std::cout);
+    return true;
+}
 
 
 /* make_world returns a test setup with k paths (1..4)

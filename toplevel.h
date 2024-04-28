@@ -25,6 +25,8 @@ struct alien {
     virtual void end_path() {};
 };
 
+// Defined in iobase.h
+class iobase;
 
 class toplevel {
     world &w_;
@@ -32,6 +34,9 @@ class toplevel {
 public:
     toplevel(world &w) : w_(w), g_(w) {}
     void visit(alien);
+
+    enum class io_type_t { IO_W_XFIG };
+    iobase *make_io(io_type_t);
 };
 
 
