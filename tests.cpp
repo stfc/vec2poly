@@ -573,7 +573,7 @@ bool test_io_w()
     w.proper_paths();
     toplevel top(w);
     iobase *io = top.make_io(toplevel::io_type_t::IO_W_XFIG);
-    io->writeworld(std::cout);
+    io->writeworld(std::cout, false);
     return true;
 }
 

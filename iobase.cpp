@@ -6,14 +6,27 @@
 #include "iobase.h"
 #include "graph-path.h"
 
-iobase::iobase(world const &w, const graph &g) : w_(w), g_(g), tol_(w.alloc_.tol())
+iobase::iobase(world const &w, graph &g) : w_(w), g_(g), tol_(w.alloc_.tol())
 {
 }
 
 
-void iobase::writeworld(std::ostream &os)
+void iobase::writeworld(std::ostream &os, bool calc)
 {
     preamble(os);
+    if(calc) {
+	try {
+	    for(;;) {
+		auto p = g_.find_polygon();
+		writepolygon(os, p);
+	    }
+	}
+	catch(graph::AllDone) {
+	}
+    }
+    // TODO: filter for paths unused in polygons
+    for( path const &p : w_.paths() )
+	writepath(os, p);
 
 }
 
@@ -77,4 +90,20 @@ void ioxfig::preamble(std::ostream &os) {
           "Single\n"
           "-2\n"
           "1200 2\n";
+}
+
+
+unsigned int ioxfig::next_colour() noexcept
+{
+    switch(colour) {
+    case 6:
+        colour = 7;    // skip white
+        break;
+    case 31:
+        colour = 0;    // skip black
+        break;
+    // more stuff here
+    }
+    // default
+    return ++colour;
 }
