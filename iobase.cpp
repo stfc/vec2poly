@@ -6,28 +6,31 @@
 #include "iobase.h"
 #include "graph-path.h"
 
-iobase::iobase(world const &w, graph &g) : w_(w), g_(g), tol_(w.alloc_.tol())
+
+
+point transform::operator()(point p) const noexcept
+{
+    double px = p.x(), py = p.y();
+    px += dx_; py += dy_;
+    px *= sx_; py *= sy_;
+    return point(px+ox_, py+oy_);
+}
+
+
+iobase::iobase(world const &w, graph const &g) : w_(w), g_(g), tf_(), tol_(w.alloc_.tol())
 {
 }
 
 
-void iobase::writeworld(std::ostream &os, bool calc)
+void iobase::writeworld(std::ostream &os)
 {
     preamble(os);
-    if(calc) {
-	try {
-	    for(;;) {
-		auto p = g_.find_polygon();
-		writepolygon(os, p);
-	    }
-	}
-	catch(graph::AllDone) {
-	}
-    }
+
+    // TODO: get polygons from toplevel
     // TODO: filter for paths unused in polygons
     for( path const &p : w_.paths() )
-	writepath(os, p);
-
+        writepath(os, p);
+    postamble(os);
 }
 
 
@@ -41,8 +44,9 @@ void ioxfig::writepoint(std::ostream &os, point xy)
     {
         os << ' ' << (val < 0 ? '-' : ' ') << (val < 0 ? -val : val);
     };
-    writecoord(xy.x());
-    writecoord(xy.y());
+    // FIXME make this a transform
+    writecoord(xy.x()+500);
+    writecoord(100-xy.y());
 }
 
 
@@ -81,7 +85,7 @@ void ioxfig::writepolygon(std::ostream &os, const polygon &p)
 
 
 void ioxfig::preamble(std::ostream &os) {
-    os << "#FIG3.2  Produced by vec2poly\n"
+    os << "#FIG 3.2  Produced by vec2poly\n"
           "Landscape\n"
           "Center\n"
           "Metric\n"

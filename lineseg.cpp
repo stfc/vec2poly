@@ -200,3 +200,18 @@ std::ostream &operator<<(std::ostream &os, path const &p)
         os << p;
     return os;
 }
+
+
+void path::points(std::function<void(pathpoint)> cb) const
+{
+    // can't happen
+    if(path_.empty())
+        throw BadPath("points called on empty path");
+    cb(path_.front().first());
+    auto p = path_.cbegin();
+    auto const q = path_.cend();
+    while(p != q) {
+        cb(p->second());
+        ++p;
+    }
+}

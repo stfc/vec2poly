@@ -10,6 +10,25 @@
 #include "graph-path.h"
 #include "toplevel.h"
 
+
+/** transform - scale/move/rotate point */
+struct transform {
+    /** displacement */
+    int dx_, dy_;
+    // rotation would go here
+    /** scale */
+    double sx_, sy_;
+    // or here
+    /** offset */
+    int ox_, oy_;
+
+    transform() noexcept : dx_(0), dy_(0), sx_(1.0), sy_(1.0), ox_(0), oy_(0) {}
+    transform(int dx, int dy, double sx, double sy, int ox, int oy) noexcept : dx_(dx), dy_(dy), sx_(sx), sy_(sy), ox_(ox), oy_(oy) {}
+
+    [[nodiscard]] point operator()(point) const noexcept;
+};
+
+
 /** iobase - format world or polygon(s) to stream
  *
  * Currently only doing output.  The default is the IO used for debugging.
@@ -18,8 +37,8 @@
 class iobase {
 protected:
     world const &w_;
-    // FIXME consider making graph const (again)
-    graph &g_;
+    graph const &g_;
+    transform tf_;
     double tol_;
     virtual void writepoint(std::ostream &os, point x) { os << x; };
     virtual void writepoint(std::ostream &os, const pathpoint q) { os << static_cast<point>(*q); }
@@ -28,9 +47,8 @@ protected:
     virtual void writepolygon(std::ostream &os, polygon const &p) { os << p; }
     virtual void postamble(std::ostream &) {};
 public:
-    // FIXME consider making graph const (again)
-    iobase(world const &, graph &);
-    virtual void writeworld(std::ostream &, bool);
+    iobase(world const &, graph const &);
+    virtual void writeworld(std::ostream &);
     virtual ~iobase() = default;
 };
 
@@ -47,7 +65,7 @@ private:
 protected:
     void writepoint(std::ostream &, point) override;
 public:
-    ioxfig(world const &w, graph &g) : iobase(w, g) {}
+    ioxfig(world const &w, graph const &g) : iobase(w, g) {}
 
     void preamble(std::ostream &) override;
     void writepath(std::ostream &os, const path &p) override;

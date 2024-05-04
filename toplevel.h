@@ -31,12 +31,13 @@ class iobase;
 class toplevel {
     world &w_;
     graph g_;
+    std::list<polygon> poly_;
 public:
-    toplevel(world &w) : w_(w), g_(w) {}
+    toplevel(world &w) : w_(w), g_(w), poly_() {}
     void visit(alien);
 
     enum class io_type_t { IO_W_XFIG };
-    iobase *make_io(io_type_t);
+    std::unique_ptr<iobase> make_io(io_type_t);
 };
 
 

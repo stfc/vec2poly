@@ -150,6 +150,9 @@ public:
     auto rbegin() const noexcept { return path_.rbegin(); }
     auto rend() const noexcept { return path_.rend(); }
 
+    /** call back for every point on the path */
+    void points(std::function<void(pathpoint)>) const;
+
     /** Return size of list, so potentially O(N) complexity */
     auto size() const noexcept { return path_.size(); }
     /* This breaks encapsulation but can be Fixed Later(tm) */

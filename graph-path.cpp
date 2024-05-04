@@ -230,6 +230,19 @@ polygon graph::pathfinder(node_t start, test_t goal, const graph::edgelist &avoi
 }
 
 
+void graph::paths(std::function<void(edge_t)> cb, bool unused)
+{
+    // See also find_unused above
+    using iterator = boost::graph_traits<Graph>::edge_iterator;
+    auto [p,q] = boost::edges(impl_->g_);
+    while(p != q) {
+        if(!unused || !impl_->g_[*p].used)
+            cb(impl_->g_[*p].index);
+        ++p;
+    }
+}
+
+
 std::ostream &operator<<(std::ostream &os, graph const &g)
 {
     // Invert the map of points

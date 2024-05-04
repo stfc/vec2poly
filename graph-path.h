@@ -39,6 +39,7 @@ struct graphimpl;
  * Boost is used for step 2
  */
 class graph {
+    /** pimpl hides boost layer */
     std::unique_ptr<graphimpl> impl_;
 public:
     graph(world &w);
@@ -75,6 +76,11 @@ public:
      * @return list of edge numbers of edges in path
      */
     polygon pathfinder(node_t start, test_t goal, const graph::edgelist &avoid);
+
+    /** Call a callback for each path/edge number.
+     * The second parameter says to call only for unused paths
+     */
+    void paths(std::function<void(edge_t)>, bool);
 
     friend std::ostream &operator<<(std::ostream &, graph const &);
 };

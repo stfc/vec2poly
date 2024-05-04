@@ -572,8 +572,8 @@ bool test_io_w()
     world w{make_world(4)};
     w.proper_paths();
     toplevel top(w);
-    iobase *io = top.make_io(toplevel::io_type_t::IO_W_XFIG);
-    io->writeworld(std::cout, false);
+    std::unique_ptr<iobase> io = top.make_io(toplevel::io_type_t::IO_W_XFIG);
+    io->writeworld(std::cout);
     return true;
 }
 
