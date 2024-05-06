@@ -25,6 +25,30 @@ struct alien {
     virtual void end_path() {};
 };
 
+
+/** special utility alien measuring all points */
+struct bbox : public alien {
+    int botlx, botly, toprx, topry;
+    unsigned int npoints;
+    bbox() noexcept;
+    void point(class point) override;
+};
+
+/** special utility alien for debugging */
+struct debug : public alien {
+    debug();
+    ~debug();
+
+    void begin_world() override;
+    void end_world() override;
+    void begin_poly() override;
+    void end_poly() override;
+    void begin_path() override;
+    void end_path() override;
+    void point(class point) override;
+};
+
+
 // Defined in iobase.h
 class iobase;
 
@@ -34,7 +58,7 @@ class toplevel {
     std::list<polygon> poly_;
 public:
     toplevel(world &w) : w_(w), g_(w), poly_() {}
-    void visit(alien);
+    void visit(alien &a) const;
 
     enum class io_type_t { IO_W_XFIG };
     std::unique_ptr<iobase> make_io(io_type_t);

@@ -6,7 +6,31 @@
 #include "toplevel.h"
 #include "iobase.h"
 
-void toplevel::visit(alien a)
+
+bbox::bbox() noexcept
+{
+    std::numeric_limits<int> lim;
+    botlx = botly = lim.max();
+    toprx = topry = lim.min();
+    npoints = 0;
+}
+
+
+void bbox::point(struct point p)
+{
+    if(p.x() < botlx)
+        botlx = p.x();
+    if(p.y() < botly)
+        botly = p.y();
+    if(p.x() > toprx)
+        toprx = p.x();
+    if(p.y() > topry)
+        topry = p.y();
+    ++npoints;
+}
+
+
+void toplevel::visit(alien &a) const
 {
     auto cb = [&a](pathpoint p)
     {
@@ -35,5 +59,44 @@ void toplevel::visit(alien a)
 
 
 std::unique_ptr<iobase> toplevel::make_io(toplevel::io_type_t) {
-    return std::make_unique<ioxfig>(w_, g_);
+    return std::make_unique<ioxfig>(*this, w_, g_);
+}
+
+
+debug::debug() { std::cerr << "BB START\n"; }
+debug::~debug() { std::cerr << "BB END\n"; }
+
+void debug::begin_world()
+{
+    std::cerr << "BB BEGWLD\n";
+}
+
+void debug::end_world()
+{
+    std::cerr << "BB ENDWLD\n";
+}
+
+void debug::begin_poly()
+{
+    std::cerr << "BB BEGPOL\n";
+}
+
+void debug::end_poly()
+{
+    std::cerr << "BB ENDPOL\n";
+}
+
+void debug::begin_path()
+{
+    std::cerr << "BB BEGPTH\n";
+}
+
+void debug::end_path()
+{
+    std::cerr << "BB ENDPTH\n";
+}
+
+void debug::point(class point p)
+{
+    std::cerr << "BB " << p << '\n';
 }

@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <numeric>
 #include "iobase.h"
 #include "graph-path.h"
 
@@ -17,7 +18,7 @@ point transform::operator()(point p) const noexcept
 }
 
 
-iobase::iobase(world const &w, graph const &g) : w_(w), g_(g), tf_(), tol_(w.alloc_.tol())
+iobase::iobase(toplevel const &t, world const &w, graph const &g) : t_(t), w_(w), g_(g), tf_(), tol_(w.alloc_.tol())
 {
 }
 
@@ -34,6 +35,18 @@ void iobase::writeworld(std::ostream &os)
 }
 
 
+ioxfig::ioxfig(const toplevel &t, const world &w, const graph &g) : iobase(t, w, g), pppl(0), colour(0)
+{
+    bbox bb;
+    t.visit(bb);
+    // shift to the centre before scaling
+    int dx = std::midpoint(bb.botlx, bb.toprx);
+    int dy = std::midpoint(bb.botly, bb.topry);
+    double scale = 1000.0 / std::max(bb.toprx-bb.botlx,bb.topry-bb.botly);
+    tf_ = transform(-dx, -dy, scale, -scale, (dx+bb.botlx)*scale, (dy+bb.botly)*scale);
+}
+
+
 void ioxfig::writepoint(std::ostream &os, point xy)
 {
     if(pppl == pppl_max) {
@@ -44,9 +57,9 @@ void ioxfig::writepoint(std::ostream &os, point xy)
     {
         os << ' ' << (val < 0 ? '-' : ' ') << (val < 0 ? -val : val);
     };
-    // FIXME make this a transform
-    writecoord(xy.x()+500);
-    writecoord(100-xy.y());
+    auto q = tf_(xy);
+    writecoord(q.x());
+    writecoord(q.y());
 }
 
 

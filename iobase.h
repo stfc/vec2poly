@@ -36,6 +36,7 @@ struct transform {
 
 class iobase {
 protected:
+    toplevel const &t_;
     world const &w_;
     graph const &g_;
     transform tf_;
@@ -47,7 +48,7 @@ protected:
     virtual void writepolygon(std::ostream &os, polygon const &p) { os << p; }
     virtual void postamble(std::ostream &) {};
 public:
-    iobase(world const &, graph const &);
+    iobase(toplevel const &, world const &, graph const &);
     virtual void writeworld(std::ostream &);
     virtual ~iobase() = default;
 };
@@ -65,7 +66,7 @@ private:
 protected:
     void writepoint(std::ostream &, point) override;
 public:
-    ioxfig(world const &w, graph const &g) : iobase(w, g) {}
+    ioxfig(toplevel const &t, world const &w, graph const &g);
 
     void preamble(std::ostream &) override;
     void writepath(std::ostream &os, const path &p) override;

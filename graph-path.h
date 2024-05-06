@@ -80,7 +80,7 @@ public:
     /** Call a callback for each path/edge number.
      * The second parameter says to call only for unused paths
      */
-    void paths(std::function<void(edge_t)>, bool);
+    void paths(std::function<void(edge_t)>, bool) const;
 
     friend std::ostream &operator<<(std::ostream &, graph const &);
 };

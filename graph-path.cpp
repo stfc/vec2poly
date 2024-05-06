@@ -230,7 +230,7 @@ polygon graph::pathfinder(node_t start, test_t goal, const graph::edgelist &avoi
 }
 
 
-void graph::paths(std::function<void(edge_t)> cb, bool unused)
+void graph::paths(std::function<void(edge_t)> cb, bool unused) const
 {
     // See also find_unused above
     using iterator = boost::graph_traits<Graph>::edge_iterator;
