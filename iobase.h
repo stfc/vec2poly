@@ -9,6 +9,13 @@
 #include "polygon.h"
 #include "graph-path.h"
 #include "toplevel.h"
+#include "except.h"
+
+
+struct BadIO : public Vec2PolyException
+{
+    BadIO(char const *msg) : Vec2PolyException(msg) {}
+};
 
 
 /** transform - scale/move/rotate point */
