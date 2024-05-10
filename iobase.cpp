@@ -76,8 +76,7 @@ void ioxfig::writepoint(std::ostream &os, point xy)
 void ioxfig::writepath(std::ostream &os, const path &p)
 {
     auto s = p.size();
-    // pen colour (fifth entry) set to 1 to make paths not-black
-    os << "2 1 0 1 1 7 50 -1 -1 0.000 0 0 -1 0 0 " << s+1 << '\n';
+    os << "2 1 0 1 " << next_colour() << " 7 50 -1 -1 0.000 0 0 -1 0 0 " << s+1 << '\n';
     for( auto const &ls : p ) {
         writepoint(os, *ls.first());
         if( 0 == --s )
@@ -91,8 +90,8 @@ void ioxfig::writepolygon(std::ostream &os, const polygon &p)
 {
     auto s = p.size(w_);
     // Subtype (second entry) is 3 for polygon
-    // Colour (fifth entry) is 0 for black
-    os << "2 3 0 1 0 7 50 -1 -1 0.000 0 0 -1 0 0 " << s << '\n';
+    // TODO: should polygons have different colours from paths
+    os << "2 3 0 1 " << next_colour() << " 7 50 -1 -1 0.000 0 0 -1 0 0 " << s << '\n';
     auto cb = [this, &os](const pathpoint q)
     {
         this->writepoint(os, static_cast<point>(*q));

@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include <array>
 #include <map>
 #include <functional>
@@ -640,7 +641,11 @@ world make_world(int k)
 bool test_bigworld()
 {
     world w = make_big_world(2);
-    std::cerr << w;
+    w.proper_paths();
+    toplevel top(w);
+    auto file = std::ofstream("bigworld.fig");
+    auto io = top.make_io(toplevel::io_type_t::IO_W_XFIG);
+    io->writeworld(file);
     return true;
 }
 

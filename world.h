@@ -8,19 +8,18 @@
 #include <vector>
 #include <exception>
 #include <ranges>
+#include <sstream>
 #include "lineseg.h"
 #include "pntalloc.h"
+#include "except.h"
 
 
-struct BadWorld : public std::exception
+struct BadWorld : public Vec2PolyException
 {
-private:
-    char const *msg_;
 public:
-    BadWorld() noexcept : msg_("Bad World") {};
-    // Note no copy is made of the string so it better be static
-    BadWorld(char const *msg) noexcept : msg_(msg) {}
-    char const *what() const noexcept override { return msg_; }
+    BadWorld() noexcept : Vec2PolyException("Bad World") {};
+    template<typename PARAM>
+    BadWorld(PARAM &&msg) noexcept : Vec2PolyException(std::forward<PARAM>(msg)) {}
 };
 
 
@@ -127,8 +126,11 @@ public:
         auto filter = [](pathpoint x) -> bool
         {
             auto i = x->use_count();
-            if(i == 1)
-                throw BadWorld("Unconnected line segment found");
+            if(i == 1) {
+		std::ostringstream msg;
+		msg << "Unconnected line segment found at " << x;
+                throw BadWorld(msg.view());
+	    }
             return i>2;
         };
         return alloc_.points() | std::ranges::views::filter(filter);
