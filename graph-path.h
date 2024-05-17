@@ -42,6 +42,7 @@ class graph {
     /** pimpl hides boost layer */
     std::unique_ptr<graphimpl> impl_;
 public:
+    graph();    // the empty graph is used only in debugging
     graph(world &w);
     graph(const graph &) = delete;
     graph(graph &&);

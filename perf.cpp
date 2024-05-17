@@ -31,8 +31,10 @@ world make_big_world(unsigned int size)
         } else {
             w.add_path({{0,k},{lo,k}});
             w.add_path({{k,0},{k,lo}});
-            w.add_path({{k,hi},{k,limit}});
-            w.add_path({{hi,k},{limit,k}});
+            if(hi < limit) {
+                w.add_path({{k,hi},{k,limit}});
+                w.add_path({{hi,k},{limit,k}});
+            }
         }
     }
     return w;

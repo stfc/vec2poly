@@ -82,6 +82,11 @@ static auto find_unused(Graph &g)
 }
 
 
+graph::graph() : impl_(std::make_unique<graphimpl>(0))
+{
+}
+
+
 graph::graph(world &w) : impl_(make_graphimpl(w))
 {
     /* At this point in construction, the graph has been set up but has no edges

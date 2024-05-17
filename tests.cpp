@@ -640,7 +640,7 @@ world make_world(int k)
 
 bool test_bigworld()
 {
-    world w = make_big_world(2);
+    world w = make_big_world(3);
     w.proper_paths();
     toplevel top(w);
     auto file = std::ofstream("bigworld.fig");
