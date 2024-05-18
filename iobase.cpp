@@ -41,10 +41,10 @@ ioxfig::ioxfig(const toplevel &t, const world &w, const graph &g) : iobase(t, w,
     t.visit(bb);
     switch(bb.npoints) {
     case 0:
-	// Nothing to print, use default transform
-	return;
+        // Nothing to print, use default transform
+        return;
     case 1:
-	throw BadIO("cannot happen single point");
+        throw BadIO("cannot happen single point");
     }
     // shift to the centre before scaling - coordinates are origin bottom right initially
     int dx = std::midpoint(bb.botlx, bb.toprx);
@@ -52,7 +52,6 @@ ioxfig::ioxfig(const toplevel &t, const world &w, const graph &g) : iobase(t, w,
     // bb cannot be a point or uninitialised
     double scale = 1000.0 / std::max(bb.toprx-bb.botlx,bb.topry-bb.botly);
     // scaling Y by -1 to put origin into top left.  Hence the factor 1.5; y maps to (H-y)+H/2 where H is height
-    //tf_ = transform(dx, dy, scale, -scale, (dx+bb.botlx)*scale, (dy+bb.botly)*scale);
     tf_ = transform(dx, dy, scale, -scale, (bb.toprx-bb.botlx)*scale, 1.5*(bb.topry-bb.botly)*scale);
 }
 

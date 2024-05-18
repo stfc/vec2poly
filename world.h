@@ -127,10 +127,10 @@ public:
         {
             auto i = x->use_count();
             if(i == 1) {
-		std::ostringstream msg;
-		msg << "Unconnected line segment found at " << x;
+                std::ostringstream msg;
+                msg << "Unconnected line segment found at " << x;
                 throw BadWorld(msg.view());
-	    }
+            }
             return i>2;
         };
         return alloc_.points() | std::ranges::views::filter(filter);
