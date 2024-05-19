@@ -58,8 +58,13 @@ void toplevel::visit(alien &a) const
 }
 
 
-std::unique_ptr<iobase> toplevel::make_io(toplevel::io_type_t) {
-    return std::make_unique<ioxfig>(*this, w_, g_);
+std::unique_ptr<iobase> toplevel::make_io(toplevel::io_type_t type) {
+    switch (type) {
+        case toplevel::io_type_t::IO_W_DEBUG:
+            return std::make_unique<iobase>(*this, w_, g_);
+        case toplevel::io_type_t::IO_W_XFIG:
+            return std::make_unique<ioxfig>(*this, w_, g_);
+    }
 }
 
 

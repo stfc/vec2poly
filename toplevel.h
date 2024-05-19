@@ -60,7 +60,7 @@ public:
     toplevel(world &w) : w_(w), g_(w), poly_() {}
     void visit(alien &a) const;
 
-    enum class io_type_t { IO_W_XFIG };
+    enum class io_type_t { IO_W_DEBUG, IO_W_XFIG };
     std::unique_ptr<iobase> make_io(io_type_t);
 };
 
