@@ -57,9 +57,17 @@ static std::unique_ptr<graphimpl> make_graphimpl(world &w)
     node_t init(0);
     std::map<pathpoint,node_t> vertices;
     // First we get the size of the world by creating all the nodes
-    // - note all branch points should be unique
-    for( auto p : w.branch_points() )
-        vertices[p] = init++;
+    // (these are not necessarily branch points as a path may meet only one other path)
+    auto may_add_point = [&init,&vertices](pathpoint p)
+    {
+	if(!vertices.contains(p))
+	    vertices[p] = init++;
+    };
+    for( auto const &p : w.paths() ) {
+	auto [a, b] = p.endpoints();
+	may_add_point(a);
+	may_add_point(b);
+    }
     auto ret = std::make_unique<graphimpl>(init);
     std::swap(ret->vertex_, vertices);
     return ret;
