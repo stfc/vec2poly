@@ -13,21 +13,23 @@ using bigint_t = long;
 // Separators are at 0 and even powers of two (see docs/perf.fig)
 bool is_separator(bigint_t);
 
-
 world make_big_world(unsigned int size)
 {
     world w(1.0);
     constexpr auto props = std::numeric_limits<bigint_t>();
-    if(size > props.digits)
+    // Ensure (2 << size) is OK by checking available binary digits
+    if(size > props.digits-1)
         throw std::out_of_range("world size too large");
     bigint_t limit = static_cast<bigint_t>(1) << size;
-    bigint_t lo = 1ul, hi = 2ul;
+    bigint_t lo = static_cast<bigint_t>(1), hi = static_cast<bigint_t>(2);
     for( bigint_t k = 0; k <= limit; ++k ) {
         if(is_separator(k) ) {
             w.add_path({{k,0},{k,limit}});
             w.add_path({{0,k},{limit,k}});
-            lo <<= 1;
-            hi <<= 1;
+	    if(k) [[likely]] {
+                lo <<= 1;
+                hi <<= 1;
+	    }
         } else {
             w.add_path({{0,k},{lo,k}});
             w.add_path({{k,0},{k,lo}});
