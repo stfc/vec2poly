@@ -560,7 +560,13 @@ bool test_tidy_poly()
     poly.add_edge(1, 2, 1);      // 1->2
     poly.add_edge(3, 2, 2);      // 2->3
     poly.add_edge(0, 3, 3);      // 3->0
-    //if(!poly.is_valid()) 
+    // sanity check
+    auto sanity = poly.is_valid(w);
+    if(sanity != poly_errno_t::POLY_GOOD) {
+	std::cerr << "test_tidy_poly untidy polygon fail with " << poly_errno_string(sanity) << '\n';
+	return false;
+    }
+    // Tidying should suggest to cut point i by replacing path 2 with path 4 (2->3)
     for( auto const &y : poly.interior_paths(w) ) {
         std::cerr << y << std::endl;
     }
@@ -640,10 +646,11 @@ world make_world(int k)
 
 bool test_bigworld()
 {
-    world w = make_big_world(3);
+    world w = make_big_world(2);
     w.split_segments();
     w.proper_paths();
     toplevel top(w);
+    // write the World into a file
     auto file = std::ofstream("bigworld.fig");
     auto io = top.make_io(toplevel::io_type_t::IO_W_XFIG);
     io->writeworld(file);

@@ -16,6 +16,7 @@ std::pair<pathpoint,pathpoint> trail_walk::walk(polygon::poly_iterator begin, po
     if(begin == end)
         throw BadPolygon(poly_errno_t::POLY_EMPTY);
 
+    // a and b are the current endpoints of the path as we traverse uts line segments
     auto [a,b] = lookup_(*begin++).endpoints();
 
     while (begin != end) {
