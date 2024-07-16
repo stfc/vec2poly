@@ -14,7 +14,7 @@ std::pair<pathpoint,pathpoint> trail_walk::walk(polygon::poly_iterator begin, po
 {
     // A single-point polygon is not allowed
     if(begin == end)
-        throw BadPolygon(poly_errno_t::POLY_EMPTY);
+        throw BadPolygon(poly_valid_t::poly_errno_t::POLY_EMPTY);
 
     // a and b are the current endpoints of the path as we traverse uts line segments
     auto [a,b] = lookup_(*begin++).endpoints();
@@ -36,7 +36,7 @@ std::pair<pathpoint,pathpoint> trail_walk::walk(polygon::poly_iterator begin, po
             b = p.first;
             cb_(b);
         } else
-            throw BadPolygon(poly_errno_t::POLY_BROKENPATH);
+            throw BadPolygon(poly_valid_t::poly_errno_t::POLY_BROKENPATH);
         ++begin;
     }
     return {a,b};
@@ -45,7 +45,7 @@ std::pair<pathpoint,pathpoint> trail_walk::walk(polygon::poly_iterator begin, po
 
 
 
-poly_errno_t polygon::is_valid(const world &w) const noexcept
+poly_valid_t polygon::is_valid(const world &w) const noexcept
 {
     // We need the world map to map edge numbers to paths and real-world locations
     path_lookup const lookup(w);
@@ -59,7 +59,7 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
         auto final = trail.walk(e, m);
         // Polygon not closed
         if(final.first != final.second)
-            return poly_errno_t::POLY_NOTCLOSED;
+            return poly_valid_t::poly_errno_t::POLY_NOTCLOSED;
     }
     catch(BadPolygon bp) {
         return bp.get_errno();
@@ -68,8 +68,8 @@ poly_errno_t polygon::is_valid(const world &w) const noexcept
     auto all = visited.end();
     std::sort(visited.begin(), all);
     if(std::unique(visited.begin(), visited.end()) != all)
-        return poly_errno_t::POLY_SELFINTERSECT;
-    return poly_errno_t::POLY_GOOD;
+        return poly_valid_t::poly_errno_t::POLY_SELFINTERSECT;
+    return poly_valid_t::poly_errno_t::POLY_GOOD;
 }
 
 
@@ -142,8 +142,8 @@ std::ostream &operator<<(std::ostream &os, const polygon &p)
 }
 
 
-char const *poly_errno_string(poly_errno_t err) {
-    switch(err) {
+char const *poly_valid_t::what() const noexcept {
+    switch(code_) {
         case poly_errno_t::POLY_GOOD:
             return "OK";
         case poly_errno_t::POLY_SELFINTERSECT:

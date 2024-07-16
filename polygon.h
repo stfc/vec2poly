@@ -29,27 +29,42 @@ typedef unsigned long edge_t;
 
 
 /** Polygon diagnostics returned by is_valid */
-enum class poly_errno_t {
-    /** Polygon is good */
-    POLY_GOOD,
-    /** Polygon is good but last point of last path is not the same as first point of first path */
-    POLY_NOTCLOSED,
-    /** Polygon has a path disconnected from its neighbour */
-    POLY_BROKENPATH,
-    /** Polygon is a single point (no paths) */
-    POLY_EMPTY,
-    /** Polygon intersects itself somewhere a la figure 8 */
-    POLY_SELFINTERSECT
+
+class poly_valid_t {
+public:
+    enum class poly_errno_t {
+        /** Polygon is good */
+        POLY_GOOD,
+        /** Polygon is good but last point of last path is not the same as first point of first path */
+        POLY_NOTCLOSED,
+        /** Polygon has a path disconnected from its neighbour */
+        POLY_BROKENPATH,
+        /** Polygon is a single point (no paths) */
+        POLY_EMPTY,
+        /** Polygon intersects itself somewhere a la figure 8 */
+        POLY_SELFINTERSECT
+    };
+
+    poly_valid_t(poly_errno_t t) : code_(t) {}
+    /** Explanation string */
+    char const *what() const noexcept;
+
+    poly_errno_t code() const noexcept { return code_; }
+
+    /** As boolean - is it valid? */
+    operator bool() const noexcept { return code_ == poly_errno_t::POLY_GOOD; }
+
+private:
+    poly_errno_t code_;
 };
 
-char const *poly_errno_string(poly_errno_t);
 
 class BadPolygon : public Vec2PolyException {
-    poly_errno_t err_;
+    poly_valid_t err_;
 public:
-    BadPolygon(poly_errno_t err): err_(err) {}
-    [[nodiscard]] char const *what() const noexcept override { return poly_errno_string(err_); }
-    [[nodiscard]] poly_errno_t get_errno() const noexcept { return err_; }
+    BadPolygon(poly_valid_t::poly_errno_t err): err_(err) {}
+    [[nodiscard]] char const *what() const noexcept override { return err_.what(); }
+    [[nodiscard]] poly_valid_t::poly_errno_t get_errno() const noexcept { return err_.code(); }
 };
 
 // This is needed to inline polygon::interior_paths which in turn is needed to deduce its return type
@@ -150,7 +165,7 @@ public:
 
     /** Check polygon is OK (starts at the start, ends at the start).
      * It assumes all paths are proper. */
-    poly_errno_t is_valid(const world &) const noexcept;
+    poly_valid_t is_valid(const world &) const noexcept;
 
     /** Use all world paths to tidy a polygon */
     void tidy(world const &);

@@ -420,8 +420,8 @@ bool test_make_poly2()
     try {
         auto poly = g.find_polygon();
         auto statws = poly.is_valid(w);
-        if(statws != poly_errno_t::POLY_GOOD) {
-            std::cerr << "poly2: find poly invalid polygon: " << poly_errno_string(statws) << std::endl;
+        if(!statws) {
+            std::cerr << "poly2: find poly invalid polygon: " << statws.what() << std::endl;
             return false;
         }
     }
@@ -484,9 +484,9 @@ static bool test_interior2()
     // Add edge 5: c->d or (-1,0) -> (-2,1)
     p.add_edge(1, 0, 5);
     auto status = p.is_valid(w);
-    if(status == poly_errno_t::POLY_GOOD)
+    if(status)
         return true;
-    std::cerr << "int2 Polygon is invalid: " << poly_errno_string(status) << "\n";
+    std::cerr << "int2 Polygon is invalid: " << status.what() << "\n";
     return false;
 }
 
@@ -556,17 +556,15 @@ bool test_tidy_poly()
     // Four points, start at 0
     polygon poly(4,0);
     // These are a subset of the "proper" paths to form a non-minimal polygon
-    poly.add_edge(1, 0, 0);      // 0->1
-    poly.add_edge(1, 2, 1);      // 1->2
-    poly.add_edge(3, 2, 2);      // 2->3
-    poly.add_edge(0, 3, 3);      // 3->0
-    // sanity check
-    auto sanity = poly.is_valid(w);
-    if(sanity != poly_errno_t::POLY_GOOD) {
-	std::cerr << "test_tidy_poly untidy polygon fail with " << poly_errno_string(sanity) << '\n';
-	return false;
+    poly.add_edge(0, 1, 0);      // 1->0 or d->c
+    poly.add_edge(1, 2, 1);      // 1->2 or d->g
+    poly.add_edge(2, 3, 2);      // 3->2 or h->g
+    poly.add_edge(3, 0, 3);      // 0->3 or c->h
+    auto valid = poly.is_valid(w);
+    if(!valid) {
+        std::cerr << "test tidy fail: " << valid.what() << "\n" << poly << std::endl;
+        return false;
     }
-    // Tidying should suggest to cut point i by replacing path 2 with path 4 (2->3)
     for( auto const &y : poly.interior_paths(w) ) {
         std::cerr << y << std::endl;
     }
