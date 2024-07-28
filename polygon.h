@@ -198,19 +198,16 @@ public:
 
          // Without an indexed iterator (it's in C++23) we have to do it ourselves
          // - tracking the index we identify paths on the polygon
-         auto not_on_poly = [this,&index](path const &) -> bool
+         auto is_interior = [this,&w,&index](path const &path) -> bool
          {
              auto p = this->edges_.cbegin(), q = this->edges_.cend();
-             return std::find(p,q,index++) == q;
-         };
-         auto interiorp = [this,&w](path const &p)-> bool
-         {
-             return this->interior(w, p.testpoint());
+             // path index is not on the polygon list (meaning path is not on polygon)
+             // and a path test point is interior to the polygon
+             return std::find(p,q,index++) == q && this->interior(w, path.testpoint());
          };
 
         return w.paths()
-               | std::views::filter(not_on_poly)
-               | std::views::filter(interiorp);
+                | std::views::filter(is_interior);
     }
 
     friend std::ostream &operator<<(std::ostream &, polygon const &);
