@@ -565,10 +565,15 @@ bool test_tidy_poly()
         std::cerr << "test tidy fail: " << valid.what() << "\n" << poly << std::endl;
         return false;
     }
+    // Paths 4 and 5 are internal to the above polygon
+    path_lookup up(w);
+    unsigned int status = 0;
     for( auto const &y : poly.interior_paths(w) ) {
-        std::cerr << y << std::endl;
+        if(up(4) == y) status |= (1 << 4);
+        if(up(5) == y) status |= (1 << 5);
+        ++status;
     }
-    return true;
+    return status == 0b110010;
 }
 
 

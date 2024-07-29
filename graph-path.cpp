@@ -60,13 +60,13 @@ static std::unique_ptr<graphimpl> make_graphimpl(world &w)
     // (these are not necessarily branch points as a path may meet only one other path)
     auto may_add_point = [&init,&vertices](pathpoint p)
     {
-	if(!vertices.contains(p))
-	    vertices[p] = init++;
+        if(!vertices.contains(p))
+            vertices[p] = init++;
     };
     for( auto const &p : w.paths() ) {
-	auto [a, b] = p.endpoints();
-	may_add_point(a);
-	may_add_point(b);
+        auto [a, b] = p.endpoints();
+        may_add_point(a);
+        may_add_point(b);
     }
     auto ret = std::make_unique<graphimpl>(init);
     std::swap(ret->vertex_, vertices);
