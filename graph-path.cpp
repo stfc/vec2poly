@@ -5,6 +5,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <map>
+#include <utility>
 #include <vector>
 #include "graph-path.h"
 #include "world.h"
@@ -17,6 +18,7 @@ struct VertexProp
 struct EdgeProp
 {
     edge_t index;
+    // TODO: Needs more thought, see todo notes
     bool used;
     // Discourage empty construction
     EdgeProp() = delete;
@@ -113,19 +115,25 @@ graph &graph::operator=(graph &&) = default;
 graph::~graph() = default;
 
 
-void graph::add_path(const path &p, edge_t i)
+void add_path_helper(Graph &g, graph const &parent, std::pair<node_t,node_t> endpoints, edge_t i)
 {
-    auto endpoints = p.endpoints();
-    Vertex src = vertex(endpoints.first), dst = vertex(endpoints.second);
     EdgeProp data{i, false};
-    auto flops = boost::add_edge(src, dst, data, impl_->g_);
+    auto flops = boost::add_edge(endpoints.first, endpoints.second, data, g);
     // Failure happens if the edge already exists?
     if(!flops.second)
         throw BadGraph("failed to add edge");
 }
 
 
-node_t graph::vertex(pathpoint p)
+void graph::add_path(const path &p, edge_t i)
+{
+    auto endpoints = p.endpoints();
+    Vertex src = vertex(endpoints.first), dst = vertex(endpoints.second);
+    add_path_helper(impl_->g_, *this, std::pair(src,dst), i);
+}
+
+
+node_t graph::vertex(pathpoint p) const
 {
     auto q = impl_->vertex_.find(p);
     if(q == impl_->vertex_.end()) {
@@ -252,6 +260,16 @@ void graph::paths(std::function<void(edge_t)> cb, bool unused) const
         if(!unused || !impl_->g_[*p].used)
             cb(impl_->g_[*p].index);
         ++p;
+    }
+}
+
+
+void graph::polygraph(const polygon &p)
+{
+    Graph g(impl_->n_);
+    // First draw the nodes from the polygon itself
+    for( auto const &e : p ) {
+
     }
 }
 

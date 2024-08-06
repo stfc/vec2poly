@@ -58,7 +58,7 @@ public:
     using edgelist = std::set<edge_t>;
 
     /** Return the node number of a given world point */
-    node_t vertex(pathpoint);
+    node_t vertex(pathpoint) const;
 
     void add_path(path const &, edge_t);
 
@@ -68,6 +68,9 @@ public:
      * @returns Throws BadGraph when a path cannot be used in a polygon
      */
     polygon find_polygon();
+
+    /** Turn a polygon and its interior into a subgraph of the main graph */
+    void polygraph(polygon const &);
 
     /** Find a path to a particular node or set of nodes
      *

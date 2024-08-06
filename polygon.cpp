@@ -86,7 +86,7 @@ poly_valid_t polygon::is_valid(const world &w) const noexcept
  * @param w World object, containing all the paths in the world
  */
 
-void polygon::tidy(world const &w)
+void polygon::tidy(world const &w, graph const &g)
 {
 }
 

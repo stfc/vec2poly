@@ -70,6 +70,8 @@ public:
 // This is needed to inline polygon::interior_paths which in turn is needed to deduce its return type
 #include "world.h"
 
+// defined in graph-path.h, used to tidy/shrink polynomials
+class graph;
 
 /** A polygon class for connecting paths.
  *
@@ -168,7 +170,7 @@ public:
     poly_valid_t is_valid(const world &) const noexcept;
 
     /** Use all world paths to tidy a polygon */
-    void tidy(world const &);
+    void tidy(world const &, graph const &);
 
     /** Size of polygon (number of points).
      * Note may be expensive to run (as in O(N))
@@ -177,7 +179,8 @@ public:
 
     /** Is a point interior to the polygon?
      * Note that all edges (in edges_) must be valid at this point
-     * ie the polygon building must be fully finished */
+     * ie the polygon building must be fully finished.
+     * Also, the point being tested must not lie on the polygon itself. */
     bool interior(const world &w, point p) const;
 
     /** Identify interior paths
