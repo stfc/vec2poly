@@ -115,7 +115,7 @@ graph &graph::operator=(graph &&) = default;
 graph::~graph() = default;
 
 
-void add_path_helper(Graph &g, graph const &parent, std::pair<node_t,node_t> endpoints, edge_t i)
+void add_path_helper(Graph &g, std::pair<node_t, node_t> endpoints, edge_t i)
 {
     EdgeProp data{i, false};
     auto flops = boost::add_edge(endpoints.first, endpoints.second, data, g);
@@ -129,7 +129,7 @@ void graph::add_path(const path &p, edge_t i)
 {
     auto endpoints = p.endpoints();
     Vertex src = vertex(endpoints.first), dst = vertex(endpoints.second);
-    add_path_helper(impl_->g_, *this, std::pair(src,dst), i);
+    add_path_helper(impl_->g_, std::pair(src, dst), i);
 }
 
 
@@ -264,12 +264,40 @@ void graph::paths(std::function<void(edge_t)> cb, bool unused) const
 }
 
 
-void graph::polygraph(const polygon &p)
+void graph::polygraph(world const &w, polygon &p)
 {
+    using endps = std::pair<node_t,node_t>;
+    path_lookup z(w);
+    // Use the same vertex indices as the main graph
+    // (these could also be cached in the edge descriptor, might be quicker)
+    auto ends = [&z, this](edge_t e) -> endps
+    {
+        path const &j = z(e);
+        auto [a,b] = j.endpoints();
+        return {vertex(a),vertex(b)};
+    };
+    auto interior = p.interior_paths(w);
+    if(interior.empty())
+        return;
     Graph g(impl_->n_);
-    // First draw the nodes from the polygon itself
-    for( auto const &e : p ) {
-
+    // First draw the nodes from the polygon itself, omitting the first path a<->b
+    node_t a, b;
+    bool first = true;
+    for( auto const edge : p ) {
+        endps ab = ends(edge);
+        if(first) [[unlikely]] {
+            first = false;
+            a = ab.first; b = ab.second;
+        } else {
+            add_path_helper(g, ab, edge);
+        }
+    }
+    // Next, add the interior paths
+    for( path const &p : interior ) {
+        auto [m,n] = p.endpoints();
+        std::pair<node_t,node_t> mn{vertex(m),vertex(n)};
+        // FIXME need to look up the edge number
+        add_path_helper(g,mn,0);
     }
 }
 

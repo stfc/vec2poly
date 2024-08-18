@@ -37,6 +37,9 @@ struct graphimpl;
  * 3. Combining the results of 1 and 2 into a polygon
  *
  * Boost is used for step 2
+ *
+ * A secondary, related, task is to take a polygon with internal paths and find
+ * a smaller polygon by replacing one of the edges and finding an alternative polygon through the internal paths
  */
 class graph {
     /** pimpl hides boost layer */
@@ -70,7 +73,7 @@ public:
     polygon find_polygon();
 
     /** Turn a polygon and its interior into a subgraph of the main graph */
-    void polygraph(polygon const &);
+    void polygraph(world const &w, polygon &p);
 
     /** Find a path to a particular node or set of nodes
      *
