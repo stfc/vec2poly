@@ -97,7 +97,7 @@ std::ostream &operator<<(std::ostream &os, lineseg const &line)
 }
 
 
-path::path(pntalloc &alloc, std::initializer_list<point> q) : path_()
+path::path(pntalloc &alloc, std::initializer_list<point> q) : path_(), edge_(std::nullopt)
 {
     if(q.size() < 1)
         throw BadPath("Path too short");
@@ -111,7 +111,7 @@ path::path(pntalloc &alloc, std::initializer_list<point> q) : path_()
 
 
 // TODO Should this just be default?
-path::path(path const &other) : path_(other.path_)
+path::path(path const &other) : path_(other.path_), edge_(other.edge_)
 {
 }
 

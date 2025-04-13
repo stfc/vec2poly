@@ -12,3 +12,4 @@
 * The "unused path" test is not good enough to catch all polygons, only all paths
 * Detect/handle degenerate graphs of branch points (disconnected or graphs with an edge cut)
 * Let point factory handle an arbitrary number of points by using a thing
+* Eliminate path points connecting only two paths by joining the paths?

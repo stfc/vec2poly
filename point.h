@@ -10,6 +10,7 @@
 #include <memory>
 // vector is only needed for the ostream of vectors of points
 #include <vector>
+#include <optional>
 
 
 /** Check between-ness (doesn't seem to be in std?).
@@ -34,6 +35,27 @@ inline bool between(NUM a, NUM x, NUM b) noexcept
 {
     return a < x && x < b || b < x && x < a;
 }
+
+
+/** node_t is the node (vertex) index in the graph as assigned by
+ * the graphimpl object (and ultimately by boost).  This value is
+ * used only by the graph but may be cached with the pathpoint.
+ *
+ * Vertices are normally the branch points, numbered 0 up to N-1.
+ * In addition to (reverse) lookup in graphimpl.vertex_, they will
+ * also be the end points of the paths (edges).
+ */
+typedef unsigned long node_t;
+
+/** edge_t is the edge index as maintained by the world object.
+ * This value is used by the graph class, but can usefully be cached by the path.
+ * After proper_paths() is run (deriving paths between branch points),
+ * the edges remain fixed in world.map_
+ */
+typedef unsigned long edge_t;
+
+
+
 
 
 class pntalloc;
@@ -78,10 +100,11 @@ using pathpoint = xpathpoint *;
 /** pathpoint is the point inside of a path */
 class xpathpoint : public point
 {
+    std::optional<node_t> node_;
     unsigned use_count_;
 public:
-    xpathpoint(double x, double y) : point(x, y), use_count_(1) {}
-    xpathpoint(point bp) : point(bp), use_count_(1) {}
+    xpathpoint(double x, double y) : point(x, y), node_(std::nullopt), use_count_(1) {}
+    xpathpoint(point bp) : point(bp), node_(std::nullopt), use_count_(1) {}
     xpathpoint(xpathpoint const &) = default;
     xpathpoint(xpathpoint &&) = default;
     xpathpoint &operator=(xpathpoint &o) = default;
@@ -98,6 +121,9 @@ public:
         // Compare as points, ignoring the usage count
         return *this == o;
     }
+
+    [[nodiscard]] std::optional<node_t> get_node() const noexcept { return node_; }
+    void set_node(node_t n) noexcept { node_ = n; }
 
     friend std::ostream &operator<<(std::ostream &, pathpoint);
 };

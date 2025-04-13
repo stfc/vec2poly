@@ -12,21 +12,6 @@
 // world is defined in world.h
 class world;
 
-/** node_t is the node (vertex) index in the graph as assigned by
- * the graphimpl object (and ultimately by boost).
- *
- * Vertices are normally the branch points, numbered 0 up to N-1.
- * In addition to (reverse) lookup in graphimpl.vertex_, they will
- * also be the end points of the paths (edges).
- */
-typedef unsigned long node_t;
-
-/** edge_t is the edge index as maintained by the world object.
- * After proper_paths() is run (deriving paths between branch points),
- * the edges remain fixed in world.map_
- */
-typedef unsigned long edge_t;
-
 
 /** Polygon diagnostics returned by is_valid */
 

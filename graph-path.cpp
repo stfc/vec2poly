@@ -62,8 +62,10 @@ static std::unique_ptr<graphimpl> make_graphimpl(world &w)
     // (these are not necessarily branch points as a path may meet only one other path)
     auto may_add_point = [&init,&vertices](pathpoint p)
     {
-        if(!vertices.contains(p))
+        if(!vertices.contains(p)) {
+            p->set_node(init);
             vertices[p] = init++;
+        }
     };
     for( auto const &p : w.paths() ) {
         auto [a, b] = p.endpoints();
@@ -129,6 +131,7 @@ void graph::add_path(const path &p, edge_t i)
 {
     auto endpoints = p.endpoints();
     Vertex src = vertex(endpoints.first), dst = vertex(endpoints.second);
+    p.set_edge(i);
     add_path_helper(impl_->g_, std::pair(src, dst), i);
 }
 
@@ -296,8 +299,12 @@ void graph::polygraph(world const &w, polygon &p)
     for( path const &p : interior ) {
         auto [m,n] = p.endpoints();
         std::pair<node_t,node_t> mn{vertex(m),vertex(n)};
-        // FIXME need to look up the edge number
-        add_path_helper(g,mn,0);
+        std::optional<edge_t> e = p.get_edge();
+        if(e.has_value())
+            add_path_helper(g,mn,0);
+        else
+            // cannot happen
+            throw BadPath("path without edge number");
     }
 }
 

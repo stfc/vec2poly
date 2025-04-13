@@ -117,8 +117,12 @@ private:
      * Line segments should be connected and non-degenerate (not a point)
      */
     std::list<lineseg> path_;
+
+    /** edge number is allocated later by the graph class */
+    mutable std::optional<edge_t> edge_;
+
     /** Empty path constructor is private as worlds are not allowed to have empty paths */
-    path() : path_{} {}
+    path() : path_{}, edge_{std::nullopt} {}
 public:
     /** Construct path connecting at least two points */
     path(pntalloc &alloc, std::initializer_list<point> q);
@@ -152,6 +156,10 @@ public:
 
     /** call back for every point on the path */
     void points(std::function<void(pathpoint)>) const;
+
+    void set_edge(edge_t e) const noexcept { edge_ = e; }
+
+    [[nodiscard]] std::optional<edge_t> get_edge() const noexcept { return edge_; }
 
     /** Return size of list, so potentially O(N) complexity */
     auto size() const noexcept { return path_.size(); }
