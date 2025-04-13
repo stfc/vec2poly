@@ -211,7 +211,7 @@ public:
 };
 
 
-/** Utility class to "walk" through a trail - a sequence of paths, calling a callback on each point on the trail.
+/** Utility class to "walk" through a trail - a sequence of paths, calling a callback on each endpoint on the trail.
  *
  * For a trail consisting of N paths, the callback will be called N+1 times.
  * The problem is that some paths need to be traversed backwards as they are bidirectional.
@@ -224,6 +224,11 @@ private:
     callback_t cb_;
 public:
     trail_walk(world const &w, callback_t cb): lookup_(w), cb_(cb) {}
+    /** walk - start traversal of trail calling the callback function
+     *
+     * Call the callback on every endpoint of every path
+     * \return a pair of the first and last point of the trail - for a closed trail, should be the same
+     */
     [[nodiscard]] std::pair<pathpoint,pathpoint> walk(polygon::poly_iterator begin, polygon::poly_iterator end);
 };
 
