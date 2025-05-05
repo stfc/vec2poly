@@ -663,5 +663,17 @@ bool test_bigworld()
 
 bool test_tidy_poly2()
 {
+    point a{0,1}, A{0,2};
+    point b{1,0}, B{2,-1};
+    point c{-1,0}, C{-2,-1};
+    world w(0.01);
+    w.add_path({a,A}); w.add_path({b,B}); w.add_path({c,C});
+    w.add_path({a,b,c}); w.add_path({A,B,C});
+    // Split all paths into individual paths (the branchpoints are calculated if not given)
+    w.proper_paths({a,b,c,A,B,C});
+    std::cout << w << std::endl;
+    graph g(w);
+    auto p = g.find_polygon();
+    std::cout << "Found polygon " << p << std::endl;
     return true;
 }

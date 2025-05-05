@@ -28,6 +28,15 @@ The task is to split the vector map into polygons A, B, C, D and E.
 
 Works on paper...
 
+General roadmap:
+1. Basic working version of core algorithm (<= we are here, 85% done?)
+2. Tidying code, fixing todos etc
+3. Implement file I/O options
+4. User interface, helpy stuff
+5. Production release 1
+6. More refactoring, some premature optimisation :-)
+7. Maybe parallelisation
+
 # LICENCE
 
 This work is licensed under [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/)
