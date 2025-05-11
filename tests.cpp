@@ -668,7 +668,7 @@ bool test_tidy_poly2()
     point c{-1,0}, C{-2,-1};
     world w(0.01);
     w.add_path({a,A}); w.add_path({b,B}); w.add_path({c,C});
-    w.add_path({a,b,c}); w.add_path({A,B,C});
+    w.add_path({a,b,c,a}); w.add_path({A,B,C,A});
     // Split all paths into individual paths (the branchpoints are calculated if not given)
     w.proper_paths({a,b,c,A,B,C});
     std::cout << w << std::endl;

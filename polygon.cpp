@@ -130,13 +130,15 @@ size_t polygon::size(world const &w) const noexcept
 
 std::ostream &operator<<(std::ostream &os, const polygon &p)
 {
-    auto const end{p.come_from_.size()};
-    for(size_t i = 0; i < end; ++i) {
-        if(p.come_from_[i] == p.invalid_)
-            os << '*';
-        else
-            os << p.come_from_[i];
-        os << " -> " << i << '\n';
+    polygon::poly_iterator q = p.begin(), r = p.end();
+    if(q == r) {
+        os << "<empty polygon>";
+    } else {
+        while (q != r) {
+            os << '-' << *q;
+            ++q;
+        }
+        os << '-';
     }
     return os;
 }
