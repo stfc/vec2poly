@@ -3,6 +3,7 @@
 #include <boost/utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
+#include <boost/graph/exterior_property.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <map>
 #include <utility>
@@ -18,11 +19,19 @@ struct VertexProp
 struct EdgeProp
 {
     edge_t index;
-    // TODO: Needs more thought, see todo notes
-    bool used;
+    /* A line segment - and hence a proper path - will end up being used
+     * in _two_ polygons, one on each side; the exception being if it is on
+     * the boundary (unless we're clever and count the "outside" as a polygon).
+     */
+    unsigned int used_;
     // Discourage empty construction
     EdgeProp() = delete;
-    explicit EdgeProp(edge_t i, bool u = false) : index(i), used(u) {}
+    explicit EdgeProp(edge_t i, unsigned int u = 0) : index(i), used_(u) {}
+
+    /** Return whether this edge is available for use */
+    bool is_candidate() const noexcept { return used_ < 2; }
+    /** Increment usage of this edge */
+    void mark_as_used() noexcept { ++used_; }
 };
 
 // (out)edge storage is the first customisation: we use a list so we can
@@ -86,7 +95,7 @@ static auto find_unused(Graph &g)
     using iterator = boost::graph_traits<Graph>::edge_iterator;
     std::pair<iterator,iterator> range = boost::edges(g);
     iterator e = std::find_if( range.first, range.second,
-            [&g](auto r) { return !g[r].used; }
+            [&g](auto r) { return g[r].is_candidate(); }
             );
     if(e == range.second)
         throw graph::AllDone();
@@ -260,7 +269,7 @@ void graph::paths(std::function<void(edge_t)> cb, bool unused) const
     using iterator = boost::graph_traits<Graph>::edge_iterator;
     auto [p,q] = boost::edges(impl_->g_);
     while(p != q) {
-        if(!unused || !impl_->g_[*p].used)
+        if(!unused || impl_->g_[*p].is_candidate())
             cb(impl_->g_[*p].index);
         ++p;
     }
@@ -305,6 +314,21 @@ void graph::polygraph(world const &w, polygon &p)
         else
             // cannot happen
             throw BadPath("path without edge number");
+    }
+}
+
+
+void graph::mark_as_used(const polygon &p)
+{
+    using EdgeMap = boost::property_map<Graph, boost::edge_index_t>;
+    auto const [edge_start, edge_end] = boost::edges(impl_->g_);
+    polygon::poly_iterator q = p.begin(), r = p.end();
+    while( q != r ) {
+        auto e = edge_start;
+        // Edge implementation should be a vector so fast lookup
+        std::advance(e,*q);
+        Graph::edge_descriptor w = *e;
+        impl_->g_[*e].mark_as_used();
     }
 }
 

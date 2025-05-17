@@ -675,5 +675,7 @@ bool test_tidy_poly2()
     graph g(w);
     auto p = g.find_polygon();
     std::cout << "Found polygon " << p << std::endl;
+    p = g.find_polygon();
+    std::cout << "Found polygon " << p << std::endl;
     return true;
 }

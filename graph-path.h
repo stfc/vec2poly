@@ -72,6 +72,9 @@ public:
      */
     polygon find_polygon();
 
+    /** Mark a given polygon as used, or to be precise the edges in the polygon */
+    void mark_as_used(polygon const &p);
+
     /** Turn a polygon and its interior into a subgraph of the main graph */
     void polygraph(world const &w, polygon &p);
 
