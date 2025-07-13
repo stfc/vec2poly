@@ -121,7 +121,8 @@ private:
     /** edge number is allocated later by the graph class */
     mutable std::optional<edge_t> edge_;
 
-    /** Empty path constructor is private as worlds are not allowed to have empty paths */
+    /** Empty path constructor is private as worlds are not allowed to have empty paths
+     * (it is used only for testing) */
     path() : path_{}, edge_{std::nullopt} {}
 public:
     /** Construct path connecting at least two points */

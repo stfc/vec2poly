@@ -45,7 +45,7 @@ bool expect(pntalloc &, int i, lineseg const &, lineseg const &, std::optional<p
 /** Test interor points algorithm */
 [[nodiscard]] static bool test_interior();
 /** Test cleaning a polygon */
-[[nodiscard]] static bool test_tidy_poly();
+[[nodiscard]] static bool test_tidy_poly1();
 /** big world generator test */
 [[nodiscard]] static bool test_bigworld();
 /** Test tidying algorithm */
@@ -75,9 +75,9 @@ int tests()
     unsigned num{0};
     // Tests are to be run in this order
     std::array<std::function<bool()>,15> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
-                                            test_poly2, test_path_iter, test_branch_points, test_path_split,
-                                            test_make_poly1, test_make_poly2, test_interior, test_tidy_poly,
-                                            test_bigworld, test_tidy_poly2, test_io_w};
+                                             test_poly2, test_path_iter, test_branch_points, test_path_split,
+                                             test_make_poly1, test_make_poly2, test_interior, test_tidy_poly1,
+                                             test_bigworld, test_tidy_poly2, test_io_w};
     for( auto testfunc : all ) {
         ++num;
         try {
@@ -547,7 +547,7 @@ bool test_interior()
 }
 
 
-bool test_tidy_poly()
+bool test_tidy_poly1()
 {
     world w{make_world(4)};
     w.proper_paths();
@@ -562,18 +562,24 @@ bool test_tidy_poly()
     poly.add_edge(3, 0, 3);      // 0->3 or c->h
     auto valid = poly.is_valid(w);
     if(!valid) {
-        std::cerr << "test tidy fail: " << valid.what() << "\n" << poly << std::endl;
+        std::cerr << "test tidy1 fail: " << valid.what() << "\n" << poly << std::endl;
         return false;
     }
     // Paths 4 and 5 are internal to the above polygon
     path_lookup up(w);
     unsigned int status = 0;
     for( auto const &y : poly.interior_paths(w) ) {
-        if(up(4) == y) status |= (1 << 4);
-        if(up(5) == y) status |= (1 << 5);
+        if(up(4) == y) status |= (1u << 4);
+        if(up(5) == y) status |= (1u << 5);
         ++status;
     }
-    return status == 0b110010;
+    // This indicator says only two were found (lowest bits) and they were four and five
+    if(status != 0b110010) {
+        std::cerr << "test tidy1 fail: expected paths 4 and 5 as interior\n";
+        return false;
+    }
+    g.polygraph(w, poly);
+    return true;
 }
 
 
@@ -675,7 +681,17 @@ bool test_tidy_poly2()
     graph g(w);
     auto p = g.find_polygon();
     std::cout << "Found polygon " << p << std::endl;
-    p = g.find_polygon();
-    std::cout << "Found polygon " << p << std::endl;
+    g.polygraph(w, p);
+    std::cout << "Updated to    " << p << std::endl;
+    return true;
+    try {
+        int maxtries = 10;
+        while (maxtries--) {
+            p = g.find_polygon();
+            std::cout << "Found polygon " << p << std::endl;
+        }
+        std::cerr << "maxtries exceeded" << std::endl;
+    }
+    catch(graph::AllDone) {}
     return true;
 }

@@ -23,7 +23,7 @@ public:
 };
 
 
-// defined in polygon.cpp
+// defined in polygon.h
 class path_lookup;
 
 
