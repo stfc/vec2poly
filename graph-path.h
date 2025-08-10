@@ -22,6 +22,7 @@ struct BadGraph : public Vec2PolyException
 };
 
 
+// graphimpl is the pimpl
 struct graphimpl;
 
 /** The graph class bridges the world class' view with boost's
@@ -77,15 +78,6 @@ public:
 
     /** Turn a polygon and its interior into a subgraph of the main graph */
     void polygraph(world const &w, polygon &p);
-
-    /** Find a path to a particular node or set of nodes
-     *
-     * @param start node index of start point
-     * @param goal called as each node is added to the subtree, returning bool if it's a target
-     * @param avoid edge numbers of paths to exclude
-     * @return list of edge numbers of edges in path
-     */
-    polygon pathfinder(node_t start, test_t goal, const graph::edgelist &avoid);
 
     /** Call a callback for each path/edge number.
      * The second parameter says to call only for unused paths

@@ -73,7 +73,7 @@ int tests()
 {
     bool ret = true;
     unsigned num{0};
-    // Tests are to be run in this order
+    // Tests are to be run in this order. Providing size because some older compilers cannot count.
     std::array<std::function<bool()>,15> all{test_pntalloc, test_lineseg, test_split_seg, test_poly1,
                                              test_poly2, test_path_iter, test_branch_points, test_path_split,
                                              test_make_poly1, test_make_poly2, test_interior, test_tidy_poly1,
@@ -555,7 +555,11 @@ bool test_tidy_poly1()
     // See description of node indices in doc for make_world
     // Four points, start at 0
     polygon poly(4,0);
-    // These are a subset of the "proper" paths to form a non-minimal polygon
+    // These are a subset of the "proper" paths to form a non-minimal polygon:
+    // Note there are two paths h->g, we need h->i->g or path 2;
+    // the other is path 4 which becomes interior;
+    // Likewise the d->c path used is path 0, so the other path (5) becomes interior
+    // (see documentation for make_world() for details)
     poly.add_edge(0, 1, 0);      // 1->0 or d->c
     poly.add_edge(1, 2, 1);      // 1->2 or d->g
     poly.add_edge(2, 3, 2);      // 3->2 or h->g
