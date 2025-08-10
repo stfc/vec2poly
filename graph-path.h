@@ -84,6 +84,9 @@ public:
      */
     void paths(std::function<void(edge_t)>, bool) const;
 
+    /** Return an edge number of a path with given endpoints */
+    edgelist edgenumber(node_t, node_t) const noexcept;
+
     friend std::ostream &operator<<(std::ostream &, graph const &);
 };
 

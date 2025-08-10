@@ -3,7 +3,6 @@
 #include <boost/utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
-#include <boost/graph/exterior_property.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <map>
 #include <utility>
@@ -50,10 +49,12 @@ struct graphimpl
     Graph g_;
     /** Nodes are non-negative integers */
     std::map<pathpoint,node_t> vertex_;
+    /** Reverse lookup */
+    std::vector<pathpoint> points_;
     /** Value of next new node to be added
      * or, equivalently, the size (number of nodes) */
     node_t n_;
-    graphimpl(node_t size) : g_(size), vertex_(), n_(size) {}
+    graphimpl(node_t size) : g_(size), vertex_(), points_(), n_(size) {}
 };
 
 
@@ -67,13 +68,15 @@ static std::unique_ptr<graphimpl> make_graphimpl(world &w)
 {
     node_t init(0);
     std::map<pathpoint,node_t> vertices;
+    std::vector<pathpoint> points;
     // First we get the size of the world by creating all the nodes
     // (these are not necessarily branch points as a path may meet only one other path)
-    auto may_add_point = [&init,&vertices](pathpoint p)
+    auto may_add_point = [&init,&vertices,&points](pathpoint p)
     {
         if(!vertices.contains(p)) {
             p->set_node(init);
             vertices[p] = init++;
+            points.push_back(p);
         }
     };
     for( auto const &p : w.paths() ) {
@@ -83,6 +86,7 @@ static std::unique_ptr<graphimpl> make_graphimpl(world &w)
     }
     auto ret = std::make_unique<graphimpl>(init);
     std::swap(ret->vertex_, vertices);
+    std::swap(ret->points_, points);
     return ret;
 }
 
@@ -330,6 +334,13 @@ void graph::mark_as_used(const polygon &p)
         Graph::edge_descriptor w = *e;
         impl_->g_[*e].mark_as_used();
     }
+}
+
+
+graph::edgelist graph::edgenumber(node_t a, node_t b) const noexcept
+{
+    edgelist e;
+
 }
 
 

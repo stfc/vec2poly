@@ -435,6 +435,7 @@ bool test_make_poly2()
         std::cerr << "poly2: no path found or other graph exception: " << e.what() << std::endl;
         return false;
     }
+    // TODO: check that the world is restored
     return true;
 }
 
