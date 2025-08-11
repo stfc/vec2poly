@@ -3,7 +3,6 @@
 #include <boost/utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
-#include <boost/graph/exterior_property.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <map>
 #include <utility>
@@ -50,10 +49,12 @@ struct graphimpl
     Graph g_;
     /** Nodes are non-negative integers */
     std::map<pathpoint,node_t> vertex_;
+    /** Reverse lookup */
+    std::vector<pathpoint> points_;
     /** Value of next new node to be added
      * or, equivalently, the size (number of nodes) */
     node_t n_;
-    graphimpl(node_t size) : g_(size), vertex_(), n_(size) {}
+    graphimpl(node_t size) : g_(size), vertex_(), points_(), n_(size) {}
 };
 
 
@@ -67,13 +68,15 @@ static std::unique_ptr<graphimpl> make_graphimpl(world &w)
 {
     node_t init(0);
     std::map<pathpoint,node_t> vertices;
+    std::vector<pathpoint> points;
     // First we get the size of the world by creating all the nodes
     // (these are not necessarily branch points as a path may meet only one other path)
-    auto may_add_point = [&init,&vertices](pathpoint p)
+    auto may_add_point = [&init,&vertices,&points](pathpoint p)
     {
         if(!vertices.contains(p)) {
             p->set_node(init);
             vertices[p] = init++;
+            points.push_back(p);
         }
     };
     for( auto const &p : w.paths() ) {
@@ -83,6 +86,7 @@ static std::unique_ptr<graphimpl> make_graphimpl(world &w)
     }
     auto ret = std::make_unique<graphimpl>(init);
     std::swap(ret->vertex_, vertices);
+    std::swap(ret->points_, points);
     return ret;
 }
 
@@ -184,27 +188,12 @@ private:
 };
 
 
-polygon graph::find_polygon() {
-    // find_unused throws an exception if no path is found
-    auto e = find_unused(impl_->g_);
-    std::cerr << "Picked unused path " << e << std::endl;
-    node_t start = boost::source(e, impl_->g_), target = boost::target(e, impl_->g_);
-    EdgeProp prop = impl_->g_[e];
-
-    auto test = [start](Vertex v) { return v == start; };
-    edgelist avoid = {prop.index};
-    polygon result = pathfinder(target, test, avoid);
-    // The current edge will form the first/last edge of the polygon
-    result.add_edge(start, target, prop.index);
-    return result;
-}
-
-
 struct EdgeData {
     Vertex src, dst;
     EdgeProp data;
     using collect = std::vector<EdgeData>;
 };
+
 
 static auto save_edges(Graph &g, graph::edgelist const &edges)
 {
@@ -233,33 +222,48 @@ static auto restore_edges(Graph &g, EdgeData::collect const &data)
 }
 
 
-polygon graph::pathfinder(node_t start, test_t goal, const graph::edgelist &avoid)
+polygon pathfinder(Graph &g, node_t start, test_t goal, const graph::edgelist &avoid)
 {
-    polygon result(impl_->n_, start);
+    polygon result(boost::num_vertices(g), start);
 
     // Temporarily remove the avoid graph edges (paths)
     // (the alternatives would be to either copy the graph minus the
     // to-be-avoided edges, or to weight the edges changing the weights
     // to prohibit using the to-be-avoided edges)
-    auto saved = save_edges(impl_->g_, avoid);
+    auto saved = save_edges(g, avoid);
 
     // For the search we need to connect start to a target point, with the
     // polygon object collecting the spanning subtree starting at start
     visitor vis(goal, result);
     try {
-        boost::breadth_first_search( impl_->g_, start, boost::visitor(vis) );
+        boost::breadth_first_search( g, start, boost::visitor(vis) );
     }
     catch(visitor::found) {
         // Restore the removed edges
-        restore_edges(impl_->g_, saved);
+        restore_edges(g, saved);
         // The visitor has completed the polygon
         return result;
     }
 
     // Restore the removed edges
-    restore_edges(impl_->g_, saved);
+    restore_edges(g, saved);
     throw BadGraph("no path found");
+}
 
+
+polygon graph::find_polygon() {
+    // find_unused throws an exception if no path is found
+    auto e = find_unused(impl_->g_);
+    std::cerr << "Picked unused path " << e << std::endl;
+    node_t start = boost::source(e, impl_->g_), target = boost::target(e, impl_->g_);
+    EdgeProp prop = impl_->g_[e];
+
+    auto test = [start](Vertex v) { return v == start; };
+    edgelist avoid = {prop.index};
+    polygon result = pathfinder(impl_->g_, target, test, avoid);
+    // The current edge will form the first/last edge of the polygon
+    result.add_edge(start, target, prop.index);
+    return result;
 }
 
 
@@ -330,6 +334,13 @@ void graph::mark_as_used(const polygon &p)
         Graph::edge_descriptor w = *e;
         impl_->g_[*e].mark_as_used();
     }
+}
+
+
+graph::edgelist graph::edgenumber(node_t a, node_t b) const noexcept
+{
+    edgelist e;
+
 }
 
 
