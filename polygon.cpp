@@ -73,6 +73,13 @@ poly_valid_t polygon::is_valid(const world &w) const noexcept
 }
 
 
+// This function cannot be inlined as std::find gets confused with an istreambuf iterator
+bool polygon::on_polygon(edge_t e) const noexcept
+{
+    return std::find(edges_.begin(), edges_.end(), e) != edges_.end();
+}
+
+
 /** Tidy a polygon by reducing it in size until it has nothing inside.
  *
  * This function is the last major algorithmic component: loop through

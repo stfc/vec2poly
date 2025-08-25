@@ -9,9 +9,9 @@
 #define VEC2POLY_TOPLEVEL_H
 
 
+#include "polygon.h"
 #include "world.h"
 #include "graph-path.h"
-#include "polygon.h"
 
 
 /** aliens visit the world - a world visitor */

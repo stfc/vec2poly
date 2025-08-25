@@ -5,7 +5,6 @@
 #ifndef VEC2POLY_POLYGON_H
 #define VEC2POLY_POLYGON_H
 
-#include <iosfwd>
 #include "point.h"
 #include "except.h"
 
@@ -154,6 +153,12 @@ public:
      * It assumes all paths are proper. */
     poly_valid_t is_valid(const world &) const noexcept;
 
+    /** Given an edge, determine whether it is on the polygon
+     * @param e Edge number in the global edge index
+     * @return Boolean, true if edge is on the polygon
+     */
+    bool on_polygon(edge_t e) const noexcept;
+
     /** Use all world paths to tidy a polygon */
     void tidy(world const &, graph const &);
 
@@ -188,10 +193,10 @@ public:
          // - tracking the index we identify paths on the polygon
          auto is_interior = [this,&w,&index](path const &path) -> bool
          {
-             auto p = this->edges_.cbegin(), q = this->edges_.cend();
+             auto const p = this->edges_.cbegin(), q = this->edges_.cend();
              // path index is not on the polygon list (meaning path is not on polygon)
              // and a path test point is interior to the polygon
-             return std::find(p,q,index++) == q && this->interior(w, path.testpoint());
+             return this->on_polygon(index++) && this->interior(w, path.testpoint());
          };
 
         return w.paths()
