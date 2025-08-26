@@ -193,7 +193,6 @@ public:
          // - tracking the index we identify paths on the polygon
          auto is_interior = [this,&w,&index](path const &path) -> bool
          {
-             auto const p = this->edges_.cbegin(), q = this->edges_.cend();
              // path index is not on the polygon list (meaning path is not on polygon)
              // and a path test point is interior to the polygon
              return this->on_polygon(index++) && this->interior(w, path.testpoint());

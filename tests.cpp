@@ -485,10 +485,20 @@ static bool test_interior2()
     // Add edge 5: c->d or (-1,0) -> (-2,1)
     p.add_edge(1, 0, 5);
     auto status = p.is_valid(w);
-    if(status)
-        return true;
-    std::cerr << "int2 Polygon is invalid: " << status.what() << "\n";
-    return false;
+    if(!status) {
+        std::cerr << "int2 Polygon is invalid: " << status.what() << "\n";
+    }
+    unsigned edges{0};
+    for(edge_t e = 0; e < 6; ++e) {
+        if(p.on_polygon(e))
+            edges |= 1u << e;
+    }
+    // Bits 1, 2, 3, 5 corresponding to the expected paths
+    if(edges != 0b101110) {
+        std::cerr << "int2 Polygon edge membership fail " << edges << "\n";
+        return false;
+    }
+    return status.code() == poly_valid_t::poly_errno_t::POLY_GOOD;
 }
 
 
